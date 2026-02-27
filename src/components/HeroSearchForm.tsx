@@ -94,7 +94,7 @@ export const HeroSearchForm = () => {
     params.set('adults', String(adults));
     if (children > 0) params.set('children', String(children));
     if (infants > 0) params.set('infants', String(infants));
-    navigate(`/search?${params.toString()}`);
+    navigate(`/tours?${params.toString()}`);
   };
 
   const destLabel = selectedDests.length > 0
