@@ -42,7 +42,7 @@ export const TourCard = ({ image, title, location, duration, price, rating, revi
       <div className="p-5">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-1 text-muted-foreground text-sm"><MapPin className="w-3.5 h-3.5" /><span>{location}</span></div>
-          <div className="flex items-center gap-1"><Star className="w-4 h-4 fill-secondary text-secondary" /><span className="text-sm font-medium text-foreground">{rating}</span><span className="text-xs text-muted-foreground">({reviewCount})</span></div>
+          <div className="flex items-center gap-1"><Star className="w-4 h-4 fill-current text-yellow-400 hover:scale-110 transition-transform duration-200" /><span className="text-sm font-medium text-foreground">{rating}</span><span className="text-xs text-muted-foreground">({reviewCount})</span></div>
         </div>
         <h3 className="font-display text-lg font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">{title}</h3>
         {description && <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{description}</p>}
