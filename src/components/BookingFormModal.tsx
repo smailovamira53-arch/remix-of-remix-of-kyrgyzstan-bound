@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 interface BookingFormModalProps {
   open: boolean;
@@ -19,6 +20,7 @@ const EMAIL = 'Mountainmagictours@gmail.com';
 
 export const BookingFormModal = ({ open, onClose, tourTitle, tourPrice }: BookingFormModalProps) => {
   const { toast } = useToast();
+  const { t, isRTL } = useLanguage();
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -50,18 +52,16 @@ export const BookingFormModal = ({ open, onClose, tourTitle, tourPrice }: Bookin
 
     setSending(true);
 
-    // Send via mailto
     const subject = encodeURIComponent(`Booking: ${tourTitle}`);
     const body = encodeURIComponent(buildMessage());
     window.open(`mailto:${EMAIL}?subject=${subject}&body=${body}`, '_blank');
 
-    // Also open WhatsApp
     const waText = encodeURIComponent(buildMessage());
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`, '_blank');
 
     toast({
-      title: 'Заявка отправлена!',
-      description: 'Мы свяжемся с вами скоро.',
+      title: t.bookingForm.successTitle,
+      description: t.bookingForm.successDescription,
     });
 
     setSending(false);
@@ -83,11 +83,11 @@ export const BookingFormModal = ({ open, onClose, tourTitle, tourPrice }: Bookin
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="bg-card rounded-2xl p-6 md:p-8 shadow-2xl border border-border w-full max-w-md max-h-[90vh] overflow-y-auto"
+            className={`bg-card rounded-2xl p-6 md:p-8 shadow-2xl border border-border w-full max-w-md max-h-[90vh] overflow-y-auto ${isRTL ? 'rtl' : 'ltr'}`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-6">
-              <h2 className="font-display text-xl font-bold text-foreground">Book: {tourTitle}</h2>
+              <h2 className="font-display text-xl font-bold text-foreground">{t.bookingForm.title.replace('{tour}', tourTitle)}</h2>
               <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
                 <X className="w-5 h-5" />
               </button>
@@ -95,37 +95,37 @@ export const BookingFormModal = ({ open, onClose, tourTitle, tourPrice }: Bookin
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="bk-name">Name *</Label>
+                <Label htmlFor="bk-name">{t.bookingForm.name}</Label>
                 <Input id="bk-name" value={form.name} onChange={(e) => update('name', e.target.value)} required maxLength={100} />
               </div>
               <div>
-                <Label htmlFor="bk-email">Email *</Label>
+                <Label htmlFor="bk-email">{t.bookingForm.email}</Label>
                 <Input id="bk-email" type="email" value={form.email} onChange={(e) => update('email', e.target.value)} required maxLength={255} />
               </div>
               <div>
-                <Label htmlFor="bk-phone">Phone / WhatsApp *</Label>
-                <Input id="bk-phone" type="tel" value={form.phone} onChange={(e) => update('phone', e.target.value)} required maxLength={20} placeholder="+996..." />
+                <Label htmlFor="bk-phone">{t.bookingForm.phone}</Label>
+                <Input id="bk-phone" type="tel" value={form.phone} onChange={(e) => update('phone', e.target.value)} required maxLength={20} placeholder={t.bookingForm.phonePlaceholder} />
               </div>
               <div>
-                <Label htmlFor="bk-dates">Preferred Dates</Label>
-                <Input id="bk-dates" value={form.dates} onChange={(e) => update('dates', e.target.value)} placeholder="e.g. June 15–20, 2026" maxLength={100} />
+                <Label htmlFor="bk-dates">{t.bookingForm.dates}</Label>
+                <Input id="bk-dates" value={form.dates} onChange={(e) => update('dates', e.target.value)} placeholder={t.bookingForm.datesPlaceholder} maxLength={100} />
               </div>
               <div>
-                <Label htmlFor="bk-people">Number of People</Label>
+                <Label htmlFor="bk-people">{t.bookingForm.people}</Label>
                 <Input id="bk-people" type="number" min={1} max={20} value={form.people} onChange={(e) => update('people', e.target.value)} />
               </div>
               <div>
-                <Label htmlFor="bk-msg">Message</Label>
-                <Textarea id="bk-msg" value={form.message} onChange={(e) => update('message', e.target.value)} rows={3} maxLength={1000} placeholder="Any special requests..." />
+                <Label htmlFor="bk-msg">{t.bookingForm.message}</Label>
+                <Textarea id="bk-msg" value={form.message} onChange={(e) => update('message', e.target.value)} rows={3} maxLength={1000} placeholder={t.bookingForm.messagePlaceholder} />
               </div>
 
               <Button type="submit" size="lg" className="w-full" disabled={sending}>
                 <Send className="w-4 h-4 mr-2" />
-                Send Booking Request
+                {sending ? t.bookingForm.submitting : t.bookingForm.submit}
               </Button>
 
               <p className="text-xs text-center text-muted-foreground">
-                Your request will be sent via email and WhatsApp. We'll respond within 24 hours.
+                {t.bookingForm.note}
               </p>
             </form>
           </motion.div>
