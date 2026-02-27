@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        display: ['Poppins', 'sans-serif'],
+        display: ['Raleway', 'sans-serif'],
         body: ['Montserrat', 'sans-serif'],
       },
       colors: {
