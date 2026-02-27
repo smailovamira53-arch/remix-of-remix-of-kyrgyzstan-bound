@@ -16,6 +16,8 @@ import ToursPage from "./pages/ToursPage";
 import AdminPage from "./pages/AdminPage";
 import NomadGamesPage from "./pages/NomadGamesPage";
 import ExpeditionsPage from "./pages/ExpeditionsPage";
+import AccommodationsPage from "./pages/AccommodationsPage";
+import AccommodationDetailPage from "./pages/AccommodationDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +41,8 @@ const App = () => (
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/expeditions" element={<ExpeditionsPage />} />
           <Route path="/expeditions/:slug" element={<ExpeditionsPage />} />
+          <Route path="/accommodations" element={<AccommodationsPage />} />
+          <Route path="/accommodations/:slug" element={<AccommodationDetailPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
