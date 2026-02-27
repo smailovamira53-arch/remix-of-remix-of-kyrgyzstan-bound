@@ -8,35 +8,7 @@ import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { useLanguage } from '@/i18n/LanguageContext';
 
-const CATEGORY_TABS: { key: TourCategory | 'all'; label: string; icon: typeof Package; description: string }[] = [
-  { key: 'all', label: 'All Tours', icon: Mountain, description: 'Browse all available tours' },
-  { key: 'package', label: 'Tour Packages', icon: Package, description: 'All-inclusive premium packages' },
-  { key: 'day', label: 'Day Excursions', icon: Sun, description: 'Short 1-day trips' },
-  { key: 'multi-day', label: 'Multi-Day Tours', icon: Mountain, description: '3+ day adventures' },
-];
-
-const ACTIVITY_TYPES = [
-  { key: 'trekking', label: 'Trekking' },
-  { key: 'horse-riding', label: 'Horse Riding' },
-  { key: 'ski-touring', label: 'Ski Touring' },
-  { key: 'yurt-camping', label: 'Yurt Camping' },
-  { key: 'photography', label: 'Photography Tours' },
-  { key: 'mountain-biking', label: 'Mountain Biking' },
-];
-
 const REGIONS = ['Issyk-Kul', 'Song-Kol', 'Bishkek', 'Karakol', 'Kazakhstan'];
-
-const DURATIONS = [
-  { key: '1-3', label: '1–3 Days' },
-  { key: '4-7', label: '4–7 Days' },
-  { key: '8+', label: '8+ Days' },
-];
-
-const PRICE_RANGES = [
-  { key: '0-300', label: 'Under $300' },
-  { key: '300-600', label: '$300–$600' },
-  { key: '600+', label: '$600+' },
-];
 
 const matchesType = (tour: typeof toursData[0], type: string) => {
   const text = `${tour.title} ${tour.fullDescription} ${tour.highlights.join(' ')}`.toLowerCase();
@@ -58,7 +30,7 @@ const parseDays = (duration: string): number => {
 
 const ToursPage = () => {
   const [params] = useSearchParams();
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const initialType = params.get('type') || '';
   const initialDestinations = params.get('destinations')?.split(',') || [];
   const initialRegion = initialDestinations.length === 1
@@ -74,6 +46,34 @@ const ToursPage = () => {
     initialDestinations.length > 0 && !initialRegion ? initialDestinations.join(' ') : ''
   );
   const [showFilters, setShowFilters] = useState(true);
+
+  const CATEGORY_TABS: { key: TourCategory | 'all'; label: string; icon: typeof Package }[] = [
+    { key: 'all', label: t.toursPage.categories.all, icon: Mountain },
+    { key: 'package', label: t.toursPage.categories.packages, icon: Package },
+    { key: 'day', label: t.toursPage.categories.dayExcursions, icon: Sun },
+    { key: 'multi-day', label: t.toursPage.categories.multiDay, icon: Mountain },
+  ];
+
+  const ACTIVITY_TYPES = [
+    { key: 'trekking', label: t.toursPage.activities.trekking },
+    { key: 'horse-riding', label: t.toursPage.activities.horseRiding },
+    { key: 'ski-touring', label: t.toursPage.activities.skiTouring },
+    { key: 'yurt-camping', label: t.toursPage.activities.yurtCamping },
+    { key: 'photography', label: t.toursPage.activities.photography },
+    { key: 'mountain-biking', label: t.toursPage.activities.mountainBiking },
+  ];
+
+  const DURATIONS = [
+    { key: '1-3', label: t.toursPage.durations.d13 },
+    { key: '4-7', label: t.toursPage.durations.d47 },
+    { key: '8+', label: t.toursPage.durations.d8 },
+  ];
+
+  const PRICE_RANGES = [
+    { key: '0-300', label: t.toursPage.priceRanges.under300 },
+    { key: '300-600', label: t.toursPage.priceRanges.mid },
+    { key: '600+', label: t.toursPage.priceRanges.over600 },
+  ];
 
   const filtered = useMemo(() => {
     return toursData.filter(tour => {
@@ -114,18 +114,18 @@ const ToursPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`min-h-screen bg-background ${isRTL ? 'rtl' : 'ltr'}`}>
       <Navbar />
       <main className="pt-32 pb-16">
         <div className="container-custom">
           <Link to="/" className="inline-flex items-center gap-2 text-primary hover:underline mb-6">
             <ArrowLeft className="w-4 h-4" />
-            Back to Home
+            {t.toursPage.backToHome}
           </Link>
 
           <div className="mb-8">
-            <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-2">Explore Our Tours</h1>
-            <p className="text-muted-foreground">{filtered.length} tour{filtered.length !== 1 ? 's' : ''} found</p>
+            <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-2">{t.toursPage.exploreTitle}</h1>
+            <p className="text-muted-foreground">{filtered.length} {t.toursPage.toursFound}</p>
           </div>
 
           {/* Category Tabs */}
@@ -154,11 +154,11 @@ const ToursPage = () => {
           <div className="flex items-center justify-between mb-4">
             <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowFilters(!showFilters)}>
               <SlidersHorizontal className="w-4 h-4" />
-              Filters
+              {t.toursPage.filtersToggle}
             </Button>
             {hasFilters && (
               <button onClick={clearFilters} className="text-sm text-primary hover:underline flex items-center gap-1">
-                <X className="w-3 h-3" /> Clear all
+                <X className="w-3 h-3" /> {t.toursPage.clearAll}
               </button>
             )}
           </div>
@@ -166,7 +166,7 @@ const ToursPage = () => {
           {showFilters && (
             <div className="bg-card border border-border rounded-xl p-6 mb-8 space-y-4">
               <div>
-                <p className="text-sm text-muted-foreground mb-2">Activity Type</p>
+                <p className="text-sm text-muted-foreground mb-2">{t.toursPage.filters.activityType}</p>
                 <div className="flex flex-wrap gap-2">
                   {ACTIVITY_TYPES.map(a => (
                     <button key={a.key} onClick={() => setSelectedType(selectedType === a.key ? '' : a.key)}
@@ -178,7 +178,7 @@ const ToursPage = () => {
               </div>
 
               <div>
-                <p className="text-sm text-muted-foreground mb-2">Region</p>
+                <p className="text-sm text-muted-foreground mb-2">{t.toursPage.filters.region}</p>
                 <div className="flex flex-wrap gap-2">
                   {REGIONS.map(r => (
                     <button key={r} onClick={() => setSelectedRegion(selectedRegion === r ? '' : r)}
@@ -191,7 +191,7 @@ const ToursPage = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-2">Duration</p>
+                  <p className="text-sm text-muted-foreground mb-2">{t.toursPage.filters.duration}</p>
                   <div className="flex flex-wrap gap-2">
                     {DURATIONS.map(d => (
                       <button key={d.key} onClick={() => setSelectedDuration(selectedDuration === d.key ? '' : d.key)}
@@ -202,7 +202,7 @@ const ToursPage = () => {
                   </div>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground mb-2">Price Range</p>
+                  <p className="text-sm text-muted-foreground mb-2">{t.toursPage.filters.price}</p>
                   <div className="flex flex-wrap gap-2">
                     {PRICE_RANGES.map(p => (
                       <button key={p.key} onClick={() => setSelectedPrice(selectedPrice === p.key ? '' : p.key)}
@@ -235,8 +235,8 @@ const ToursPage = () => {
             </div>
           ) : (
             <div className="text-center py-16">
-              <p className="text-lg text-muted-foreground mb-4">No tours match your filters.</p>
-              <Button onClick={() => { setActiveCategory('all'); clearFilters(); }}>Clear All Filters</Button>
+              <p className="text-lg text-muted-foreground mb-4">{t.toursPage.noResults}</p>
+              <Button onClick={() => { setActiveCategory('all'); clearFilters(); }}>{t.toursPage.clearAllFilters}</Button>
             </div>
           )}
         </div>

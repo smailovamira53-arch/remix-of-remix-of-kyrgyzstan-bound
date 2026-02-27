@@ -6,16 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { accommodationsData, AccommodationType } from '@/data/accommodationsData';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 const REGIONS = ['All', 'Issyk-Kul', 'Naryn', 'Bishkek', 'Jalal-Abad'];
-const TYPES: { key: AccommodationType | 'all'; label: string; icon: typeof Building }[] = [
-  { key: 'all', label: 'All Types', icon: Building },
-  { key: 'hotel', label: 'Hotels', icon: Building },
-  { key: 'yurt', label: 'Yurt Camps', icon: Tent },
-  { key: 'guesthouse', label: 'Guesthouses', icon: Home },
-  { key: 'resort', label: 'Resorts', icon: Waves },
-  { key: 'eco-lodge', label: 'Eco Lodges', icon: TreePine },
-];
 
 const amenityIcon = (a: string) => {
   const lower = a.toLowerCase();
@@ -29,6 +22,16 @@ const amenityIcon = (a: string) => {
 const AccommodationsPage = () => {
   const [selectedRegion, setSelectedRegion] = useState('All');
   const [selectedType, setSelectedType] = useState<AccommodationType | 'all'>('all');
+  const { t, isRTL } = useLanguage();
+
+  const TYPES: { key: AccommodationType | 'all'; label: string; icon: typeof Building }[] = [
+    { key: 'all', label: t.accommodations.filters.allTypes, icon: Building },
+    { key: 'hotel', label: t.accommodations.filters.hotels, icon: Building },
+    { key: 'yurt', label: t.accommodations.filters.yurtCamps, icon: Tent },
+    { key: 'guesthouse', label: t.accommodations.filters.guesthouses, icon: Home },
+    { key: 'resort', label: t.accommodations.filters.resorts, icon: Waves },
+    { key: 'eco-lodge', label: t.accommodations.filters.ecoLodges, icon: TreePine },
+  ];
 
   const filtered = useMemo(() => {
     return accommodationsData.filter(acc => {
@@ -38,8 +41,15 @@ const AccommodationsPage = () => {
     });
   }, [selectedRegion, selectedType]);
 
+  const perks = [
+    { icon: BadgePercent, text: t.accommodations.perks.discount },
+    { icon: Plane, text: t.accommodations.perks.transfer },
+    { icon: Phone, text: t.accommodations.perks.support },
+    { icon: Sparkles, text: t.accommodations.perks.bestPrice },
+  ];
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`min-h-screen bg-background ${isRTL ? 'rtl' : 'ltr'}`}>
       <Navbar />
 
       {/* Hero */}
@@ -57,13 +67,13 @@ const AccommodationsPage = () => {
           className="relative z-10 text-center px-4 max-w-3xl"
         >
           <span className="inline-block px-4 py-1.5 bg-primary/20 backdrop-blur-sm text-white text-sm font-medium rounded-full mb-6 border border-white/20">
-            🏠 Verified & Inspected
+            {t.accommodations.heroBadge}
           </span>
           <h1 className="font-display text-3xl sm:text-4xl md:text-5xl text-white mb-4 leading-tight">
-            Verified Stays Across Kyrgyzstan
+            {t.accommodations.heroTitle}
           </h1>
           <p className="text-lg md:text-xl text-white/90">
-            Hotels, Yurts & Eco Lodges — hand-picked for quality, comfort, and authentic experience
+            {t.accommodations.heroSubtitle}
           </p>
         </motion.div>
       </section>
@@ -74,19 +84,14 @@ const AccommodationsPage = () => {
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div>
               <h2 className="font-display text-xl md:text-2xl font-bold mb-4">
-                Book Through Us — Get More for Less
+                {t.accommodations.marketingTitle}
               </h2>
               <p className="text-primary-foreground/85 leading-relaxed">
-                We personally inspect every property. Book through Mountain Magic Tours and get exclusive perks you won't find on Booking.com or Airbnb. Support local businesses directly.
+                {t.accommodations.marketingDescription}
               </p>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              {[
-                { icon: BadgePercent, text: '10–15% discount off rack rates' },
-                { icon: Plane, text: 'Free Manas airport transfer' },
-                { icon: Phone, text: '24/7 support in KG/RU/EN' },
-                { icon: Sparkles, text: 'Best price guarantee' },
-              ].map(perk => {
+              {perks.map(perk => {
                 const Icon = perk.icon;
                 return (
                   <div key={perk.text} className="flex items-start gap-3">
@@ -108,7 +113,7 @@ const AccommodationsPage = () => {
           {/* Filters */}
           <div className="flex flex-col md:flex-row gap-6 mb-10">
             <div>
-              <p className="text-sm text-muted-foreground mb-2 font-medium">Region</p>
+              <p className="text-sm text-muted-foreground mb-2 font-medium">{t.accommodations.filters.region}</p>
               <div className="flex flex-wrap gap-2">
                 {REGIONS.map(r => (
                   <button
@@ -120,28 +125,28 @@ const AccommodationsPage = () => {
                         : 'border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
                     }`}
                   >
-                    {r}
+                    {r === 'All' ? t.accommodations.filters.all : r}
                   </button>
                 ))}
               </div>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground mb-2 font-medium">Type</p>
+              <p className="text-sm text-muted-foreground mb-2 font-medium">{t.accommodations.filters.type}</p>
               <div className="flex flex-wrap gap-2">
-                {TYPES.map(t => {
-                  const Icon = t.icon;
+                {TYPES.map(tp => {
+                  const Icon = tp.icon;
                   return (
                     <button
-                      key={t.key}
-                      onClick={() => setSelectedType(t.key)}
+                      key={tp.key}
+                      onClick={() => setSelectedType(tp.key)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm border-2 transition-all duration-200 ${
-                        selectedType === t.key
+                        selectedType === tp.key
                           ? 'bg-primary text-primary-foreground border-primary'
                           : 'border-border text-muted-foreground hover:border-primary/50 hover:text-foreground'
                       }`}
                     >
                       <Icon className="w-3.5 h-3.5" />
-                      {t.label}
+                      {tp.label}
                     </button>
                   );
                 })}
@@ -149,7 +154,11 @@ const AccommodationsPage = () => {
             </div>
           </div>
 
-          <p className="text-muted-foreground mb-6">{filtered.length} propert{filtered.length !== 1 ? 'ies' : 'y'} found</p>
+          <p className="text-muted-foreground mb-6">
+            {filtered.length} {filtered.length !== 1
+              ? (t.accommodations.propertiesFound || '').replace('{count}', '')
+              : (t.accommodations.propertyFound || '').replace('{count}', '')}
+          </p>
 
           {/* Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -165,13 +174,13 @@ const AccommodationsPage = () => {
               >
                 <div className="relative h-48 overflow-hidden">
                   <img src={acc.image} alt={acc.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                  <div className="absolute top-3 right-3 flex items-center gap-1 bg-background/85 backdrop-blur-sm px-2 py-1 rounded-full">
+                  <div className={`absolute top-3 ${isRTL ? 'left-3' : 'right-3'} flex items-center gap-1 bg-background/85 backdrop-blur-sm px-2 py-1 rounded-full`}>
                     <Star className="w-3.5 h-3.5 fill-current text-yellow-400" />
                     <span className="text-xs font-semibold text-foreground">{acc.rating}</span>
                     <span className="text-xs text-muted-foreground">({acc.reviewCount})</span>
                   </div>
-                  <span className="absolute top-3 left-3 px-2.5 py-1 bg-primary/90 text-primary-foreground text-xs font-medium rounded-full capitalize">
-                    {acc.type === 'eco-lodge' ? 'Eco Lodge' : acc.type}
+                  <span className={`absolute top-3 ${isRTL ? 'right-3' : 'left-3'} px-2.5 py-1 bg-primary/90 text-primary-foreground text-xs font-medium rounded-full capitalize`}>
+                    {acc.type === 'eco-lodge' ? (t.accommodations.filters.ecoLodges || 'Eco Lodge') : acc.type}
                   </span>
                 </div>
 
@@ -199,11 +208,11 @@ const AccommodationsPage = () => {
 
                   <div className="flex items-center justify-between pt-3 border-t border-border">
                     <div>
-                      <p className="text-xs text-muted-foreground">From</p>
-                      <p className="text-lg font-bold text-foreground">${acc.pricePerNight}<span className="text-xs font-normal text-muted-foreground">/night</span></p>
+                      <p className="text-xs text-muted-foreground">{t.common.from}</p>
+                      <p className="text-lg font-bold text-foreground">${acc.pricePerNight}<span className="text-xs font-normal text-muted-foreground">{t.common.perNight}</span></p>
                     </div>
                     <Button size="sm" asChild>
-                      <Link to={`/accommodations/${acc.slug}`}>Book & Save</Link>
+                      <Link to={`/accommodations/${acc.slug}`}>{t.accommodations.bookSave}</Link>
                     </Button>
                   </div>
                 </div>
@@ -213,8 +222,8 @@ const AccommodationsPage = () => {
 
           {filtered.length === 0 && (
             <div className="text-center py-16">
-              <p className="text-lg text-muted-foreground mb-4">No properties match your filters.</p>
-              <Button onClick={() => { setSelectedRegion('All'); setSelectedType('all'); }}>Clear Filters</Button>
+              <p className="text-lg text-muted-foreground mb-4">{t.accommodations.noResults}</p>
+              <Button onClick={() => { setSelectedRegion('All'); setSelectedType('all'); }}>{t.common.clearFilters}</Button>
             </div>
           )}
         </div>

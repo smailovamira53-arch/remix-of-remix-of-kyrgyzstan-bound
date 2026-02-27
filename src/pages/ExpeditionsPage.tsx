@@ -6,113 +6,42 @@ import { Button } from '@/components/ui/button';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { BookingFormModal } from '@/components/BookingFormModal';
-
-interface Expedition {
-  slug: string;
-  image: string;
-  title: string;
-  location: string;
-  duration: string;
-  price: number;
-  priceLabel: string;
-  rating: number;
-  reviewCount: number;
-  difficulty: string;
-  maxGroup: number;
-  description: string;
-}
-
-const expeditions: Expedition[] = [
-  {
-    slug: 'peak-lenin-base-camp',
-    image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&h=600&fit=crop',
-    title: 'Peak Lenin Base Camp Expedition',
-    location: 'Pamir-Alay, Osh Region',
-    duration: '21 Days',
-    price: 2500,
-    priceLabel: 'From $2,500',
-    rating: 4.9,
-    reviewCount: 34,
-    difficulty: 'Hard',
-    maxGroup: 8,
-    description: 'Trek to the base camp of Peak Lenin (7,134m), one of the most accessible 7,000m peaks in the world. Acclimatization hikes, glacier crossings, and breathtaking Pamir views.',
-  },
-  {
-    slug: 'khan-tengri-summit',
-    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop',
-    title: 'Khan Tengri Summit Climb',
-    location: 'Central Tien Shan',
-    duration: '18 Days',
-    price: 3500,
-    priceLabel: 'From $3,500',
-    rating: 4.8,
-    reviewCount: 18,
-    difficulty: 'Expert',
-    maxGroup: 6,
-    description: 'Attempt the stunning marble pyramid of Khan Tengri (7,010m). Technical ice and snow climbing with experienced high-altitude guides. Helicopter access to base camp.',
-  },
-  {
-    slug: 'tien-shan-heli-trek',
-    image: 'https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=800&h=600&fit=crop',
-    title: 'Tien Shan Helicopter + Trek Combo',
-    location: 'Inylchek Glacier',
-    duration: '7 Days',
-    price: 1800,
-    priceLabel: 'From $1,800',
-    rating: 5.0,
-    reviewCount: 22,
-    difficulty: 'Moderate',
-    maxGroup: 10,
-    description: 'Fly by helicopter deep into the Tien Shan range, then trek through pristine glacial valleys. Witness the Southern Inylchek Glacier and Merzbacher Lake up close.',
-  },
-  {
-    slug: 'ala-too-mountaineering',
-    image: 'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=800&h=600&fit=crop',
-    title: 'Ala-Too Range Multi-Day Mountaineering',
-    location: 'Kyrgyz Ala-Too, Bishkek',
-    duration: '10 Days',
-    price: 1200,
-    priceLabel: 'From $1,200',
-    rating: 4.7,
-    reviewCount: 41,
-    difficulty: 'Hard',
-    maxGroup: 8,
-    description: 'Climb multiple peaks in the Kyrgyz Ala-Too range right above Bishkek. Technical rope work, glacier travel, and summit attempts with panoramic views.',
-  },
-  {
-    slug: 'pamir-highway-expedition',
-    image: 'https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?w=800&h=600&fit=crop',
-    title: 'Pamir Highway Overland Expedition',
-    location: 'Osh – Pamir – Dushanbe',
-    duration: '14 Days',
-    price: 2200,
-    priceLabel: 'From $2,200',
-    rating: 4.9,
-    reviewCount: 27,
-    difficulty: 'Moderate',
-    maxGroup: 10,
-    description: 'Drive the legendary Pamir Highway — the second-highest international road in the world. Remote villages, high passes over 4,600m, and raw Central Asian wilderness.',
-  },
-];
-
-const whyChoose = [
-  { icon: Users, title: 'Professional Guides', description: 'Certified mountaineers with 10+ years of high-altitude experience in the Tien Shan and Pamir ranges.' },
-  { icon: Shield, title: 'Safety First', description: 'Comprehensive safety protocols, satellite communication, medical kits, and evacuation plans on every expedition.' },
-  { icon: Mountain, title: 'Small Groups', description: 'Maximum 6–10 participants per expedition for personalized attention and minimal environmental impact.' },
-  { icon: FileCheck, title: 'All Permits Included', description: 'Border zone permits, national park fees, and all bureaucratic paperwork handled by our team.' },
-];
+import { useLanguage } from '@/i18n/LanguageContext';
 
 const difficultyColor = (d: string) => {
-  if (d === 'Expert') return 'bg-destructive/10 text-destructive';
-  if (d === 'Hard') return 'bg-orange-100 text-orange-700';
+  if (d === 'Expert' || d === 'Экспертная' || d === 'Experto' || d === 'متقدمة') return 'bg-destructive/10 text-destructive';
+  if (d === 'Hard' || d === 'Сложная' || d === 'Difícil' || d === 'صعبة') return 'bg-orange-100 text-orange-700';
   return 'bg-primary/10 text-primary';
 };
 
+const EXPEDITION_IMAGES = [
+  'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&h=600&fit=crop',
+  'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop',
+  'https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=800&h=600&fit=crop',
+  'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=800&h=600&fit=crop',
+  'https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?w=800&h=600&fit=crop',
+];
+
+const EXPEDITION_SLUGS = ['peak-lenin-base-camp', 'khan-tengri-summit', 'tien-shan-heli-trek', 'ala-too-mountaineering', 'pamir-highway-expedition'];
+const EXPEDITION_PRICES = [2500, 3500, 1800, 1200, 2200];
+const EXPEDITION_RATINGS = [4.9, 4.8, 5.0, 4.7, 4.9];
+const EXPEDITION_REVIEWS = [34, 18, 22, 41, 27];
+const EXPEDITION_DIFFICULTIES = ['hard', 'expert', 'moderate', 'hard', 'moderate'] as const;
+const EXPEDITION_MAX_GROUPS = [8, 6, 10, 8, 10];
+
+const WHY_ICONS = [Users, Shield, Mountain, FileCheck];
+const WHY_KEYS = ['guides', 'safety', 'groups', 'permits'] as const;
+
 const ExpeditionsPage = () => {
   const [booking, setBooking] = useState<{ title: string; price: number } | null>(null);
+  const { t, isRTL } = useLanguage();
+
+  const difficultyLabel = (key: typeof EXPEDITION_DIFFICULTIES[number]) => {
+    return t.expeditions.difficulty[key] || key;
+  };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={`min-h-screen bg-background ${isRTL ? 'rtl' : 'ltr'}`}>
       <Navbar />
 
       {/* Hero */}
@@ -130,13 +59,13 @@ const ExpeditionsPage = () => {
           className="relative z-10 text-center px-4 max-w-3xl"
         >
           <span className="inline-block px-4 py-1.5 bg-destructive/20 backdrop-blur-sm text-white text-sm font-medium rounded-full mb-6 border border-white/20">
-            🏔️ For Real Adventurers
+            {t.expeditions.heroBadge}
           </span>
           <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-white mb-4 leading-tight">
-            Extreme Expeditions in Kyrgyzstan
+            {t.expeditions.heroTitle}
           </h1>
           <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
-            High peaks, technical climbs, remote wilderness — push your limits in the heart of Central Asia
+            {t.expeditions.heroSubtitle}
           </p>
         </motion.div>
       </section>
@@ -145,14 +74,14 @@ const ExpeditionsPage = () => {
       <section className="section-padding bg-background">
         <div className="container-custom">
           <div className="text-center mb-12">
-            <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-3">Our Expeditions</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">Choose your challenge — from moderate treks to expert-level summit attempts</p>
+            <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-3">{t.expeditions.sectionTitle}</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">{t.expeditions.sectionDescription}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {expeditions.map((exp, index) => (
+            {t.expeditions.items.map((exp, index) => (
               <motion.div
-                key={exp.slug}
+                key={EXPEDITION_SLUGS[index]}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -161,14 +90,14 @@ const ExpeditionsPage = () => {
                 className="group bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-border/50"
               >
                 <div className="relative h-56 overflow-hidden">
-                  <img src={exp.image} alt={exp.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  <img src={EXPEDITION_IMAGES[index]} alt={exp.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                   <div className="absolute inset-0 bg-gradient-to-t from-foreground/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <span className={`absolute top-4 left-4 px-3 py-1 text-xs font-semibold rounded-full ${difficultyColor(exp.difficulty)}`}>
-                    {exp.difficulty}
+                  <span className={`absolute top-4 ${isRTL ? 'right-4' : 'left-4'} px-3 py-1 text-xs font-semibold rounded-full ${difficultyColor(difficultyLabel(EXPEDITION_DIFFICULTIES[index]))}`}>
+                    {difficultyLabel(EXPEDITION_DIFFICULTIES[index])}
                   </span>
-                  <div className="absolute top-4 right-4 flex items-center gap-1 bg-background/80 backdrop-blur-sm px-2 py-1 rounded-full">
+                  <div className={`absolute top-4 ${isRTL ? 'left-4' : 'right-4'} flex items-center gap-1 bg-background/80 backdrop-blur-sm px-2 py-1 rounded-full`}>
                     <Star className="w-3.5 h-3.5 fill-current text-yellow-400" />
-                    <span className="text-xs font-medium text-foreground">{exp.rating}</span>
+                    <span className="text-xs font-medium text-foreground">{EXPEDITION_RATINGS[index]}</span>
                   </div>
                 </div>
 
@@ -184,20 +113,20 @@ const ExpeditionsPage = () => {
 
                   <div className="flex items-center gap-3 text-muted-foreground text-sm mb-4">
                     <div className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /><span>{exp.duration}</span></div>
-                    <div className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /><span>Max {exp.maxGroup}</span></div>
+                    <div className="flex items-center gap-1"><Users className="w-3.5 h-3.5" /><span>{t.common.max} {EXPEDITION_MAX_GROUPS[index]}</span></div>
                   </div>
 
                   <div className="flex items-center justify-between pt-4 border-t border-border">
                     <div>
-                      <p className="text-xs text-muted-foreground">From</p>
-                      <p className="text-xl font-bold text-foreground">${exp.price.toLocaleString()}</p>
+                      <p className="text-xs text-muted-foreground">{t.common.from}</p>
+                      <p className="text-xl font-bold text-foreground">${EXPEDITION_PRICES[index].toLocaleString()}</p>
                     </div>
                     <div className="flex gap-2">
                       <Button size="sm" variant="outline" asChild>
-                        <Link to={`/expeditions/${exp.slug}`}>Details</Link>
+                        <Link to={`/expeditions/${EXPEDITION_SLUGS[index]}`}>{t.common.details}</Link>
                       </Button>
-                      <Button size="sm" onClick={() => setBooking({ title: exp.title, price: exp.price })}>
-                        Book Now
+                      <Button size="sm" onClick={() => setBooking({ title: exp.title, price: EXPEDITION_PRICES[index] })}>
+                        {t.common.bookNow}
                       </Button>
                     </div>
                   </div>
@@ -212,15 +141,16 @@ const ExpeditionsPage = () => {
       <section className="section-padding bg-muted">
         <div className="container-custom">
           <div className="text-center mb-12">
-            <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-3">Why Choose Our Expeditions</h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">We combine world-class mountaineering expertise with deep local knowledge</p>
+            <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-3">{t.expeditions.whyTitle}</h2>
+            <p className="text-muted-foreground max-w-xl mx-auto">{t.expeditions.whyDescription}</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {whyChoose.map((item, index) => {
-              const Icon = item.icon;
+            {WHY_KEYS.map((key, index) => {
+              const Icon = WHY_ICONS[index];
+              const item = t.expeditions.whyItems[key];
               return (
                 <motion.div
-                  key={item.title}
+                  key={key}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -242,11 +172,11 @@ const ExpeditionsPage = () => {
       {/* CTA */}
       <section className="py-16 bg-primary">
         <div className="container-custom text-center">
-          <h2 className="font-display text-2xl md:text-3xl font-bold text-primary-foreground mb-4">Ready for the Challenge?</h2>
-          <p className="text-primary-foreground/80 mb-8 max-w-lg mx-auto">Contact us to discuss your expedition goals — we'll build a custom plan for your team.</p>
+          <h2 className="font-display text-2xl md:text-3xl font-bold text-primary-foreground mb-4">{t.expeditions.ctaTitle}</h2>
+          <p className="text-primary-foreground/80 mb-8 max-w-lg mx-auto">{t.expeditions.ctaDescription}</p>
           <div className="flex flex-wrap justify-center gap-4">
             <Button size="lg" variant="secondary" asChild>
-              <Link to="/contact" className="gap-2">Get in Touch <ArrowRight className="w-4 h-4" /></Link>
+              <Link to="/contact" className="gap-2">{t.expeditions.ctaButton} <ArrowRight className="w-4 h-4" /></Link>
             </Button>
           </div>
         </div>
