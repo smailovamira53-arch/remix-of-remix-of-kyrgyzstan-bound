@@ -32,7 +32,7 @@ export const GuideCard = ({ image, name, specialties, languages, dailyRate, rati
         <div className="absolute bottom-4 left-4 right-4">
           <h3 className="font-display text-xl font-semibold text-white mb-1">{name}</h3>
           <div className="flex items-center gap-1 text-white/90">
-            <Star className="w-4 h-4 fill-secondary text-secondary" />
+            <Star className="w-4 h-4 fill-current text-yellow-400 hover:scale-110 transition-transform duration-200" />
             <span className="text-sm font-medium">{rating}</span>
             <span className="text-xs text-white/70">({reviewCount} {t.guides?.reviews || 'reviews'})</span>
           </div>

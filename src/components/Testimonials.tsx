@@ -20,7 +20,7 @@ export const Testimonials = () => {
           {testimonials.map((testimonial, index) => (
             <motion.div key={testimonial.name} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: index * 0.15 }} className="bg-card rounded-2xl p-6 border border-border/50 relative">
               <div className="absolute -top-4 right-6 w-8 h-8 rounded-full bg-primary flex items-center justify-center"><Quote className="w-4 h-4 text-primary-foreground" /></div>
-              <div className="flex gap-1 mb-4">{[...Array(testimonial.rating)].map((_, i) => (<Star key={i} className="w-4 h-4 fill-secondary text-secondary" />))}</div>
+              <div className="flex gap-1 mb-4">{[...Array(testimonial.rating)].map((_, i) => (<Star key={i} className="w-4 h-4 fill-current text-yellow-400 hover:scale-110 transition-transform duration-200" />))}</div>
               <p className="text-foreground mb-6 leading-relaxed">"{testimonial.text}"</p>
               <p className="text-xs text-primary font-medium bg-primary/10 inline-block px-3 py-1 rounded-full mb-4">{testimonial.tour}</p>
               <div className="flex items-center gap-3 pt-4 border-t border-border">

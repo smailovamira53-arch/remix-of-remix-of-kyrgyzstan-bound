@@ -118,7 +118,7 @@ const TourDetailPage = () => {
               </h1>
               
               <div className="flex items-center gap-2 mb-6">
-                <Star className="w-5 h-5 fill-secondary text-secondary" />
+                <Star className="w-5 h-5 fill-current text-yellow-400" />
                 <span className="text-lg font-semibold">{tour.rating}</span>
                 <span className="text-muted-foreground">({tour.reviewCount} {t.guides?.reviews || 'reviews'})</span>
               </div>
@@ -304,7 +304,7 @@ const TourDetailPage = () => {
                   <span className="text-muted-foreground">{t.tourCard.maxPeople.replace('{count}', String(tour.maxGroup))}</span>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
-                  <Star className="w-5 h-5 text-secondary fill-secondary" />
+                  <Star className="w-5 h-5 fill-current text-yellow-400" />
                   <span className="text-muted-foreground">{tour.rating} ({tour.reviewCount} {t.guides?.reviews || 'reviews'})</span>
                 </div>
               </div>
