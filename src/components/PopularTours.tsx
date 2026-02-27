@@ -79,7 +79,9 @@ export const PopularTours = () => {
           {tours.map((tour) => (<TourCard key={tour.slug} {...tour} />))}
         </div>
         <div className="text-center">
-          <Button size="lg" variant="outline" className="gap-2">{t.popularTours.viewAll}<ArrowRight className="w-4 h-4" /></Button>
+          <a href="/tours">
+            <Button size="lg" variant="outline" className="gap-2">{t.popularTours.viewAll}<ArrowRight className="w-4 h-4" /></Button>
+          </a>
         </div>
       </div>
     </section>
