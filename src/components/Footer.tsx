@@ -67,8 +67,8 @@ export const Footer = () => {
             <p className="text-primary-foreground/70 text-sm mb-6 max-w-xs">{t.footer.brand.description}</p>
             <div className="space-y-2 text-sm text-primary-foreground/70">
               <p className="flex items-center gap-2"><MapPin className="w-4 h-4" />Bishkek, Kyrgyzstan</p>
-              <p className="flex items-center gap-2"><Phone className="w-4 h-4" />+996 312 123 456</p>
-              <p className="flex items-center gap-2"><Mail className="w-4 h-4" />hello@mmtours.kg</p>
+              <p className="flex items-center gap-2"><Phone className="w-4 h-4" />+996 703 404 054</p>
+              <p className="flex items-center gap-2"><Mail className="w-4 h-4" />Mountainmagictours@gmail.com</p>
             </div>
           </div>
 
@@ -114,9 +114,9 @@ export const Footer = () => {
         <div className="container-custom py-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-primary-foreground/50">{t.footer.copyright}</p>
           <div className="flex items-center gap-4">
-            <a href="https://instagram.com/mountainmagictours" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 hover:scale-110 transition-all duration-300"><Instagram className="w-5 h-5" /></a>
-            <a href="https://facebook.com/mountainmagictours" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 hover:scale-110 transition-all duration-300"><Facebook className="w-5 h-5" /></a>
-            <a href="https://youtube.com/mountainmagictours" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 hover:scale-110 transition-all duration-300"><Youtube className="w-5 h-5" /></a>
+            <a href="https://www.instagram.com/mountain_magic_tours" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 hover:scale-110 transition-all duration-300"><Instagram className="w-5 h-5" /></a>
+            <a href="https://www.facebook.com/mountainmagictours" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 hover:scale-110 transition-all duration-300"><Facebook className="w-5 h-5" /></a>
+            <a href="https://youtube.com/@mountainmagictours" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 hover:scale-110 transition-all duration-300"><Youtube className="w-5 h-5" /></a>
           </div>
         </div>
       </div>
