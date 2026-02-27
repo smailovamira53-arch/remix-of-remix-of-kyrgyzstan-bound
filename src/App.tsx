@@ -12,6 +12,7 @@ import TourDetailPage from "./pages/TourDetailPage";
 import SearchResultsPage from "./pages/SearchResultsPage";
 import AboutKyrgyzstanPage from "./pages/AboutKyrgyzstanPage";
 import ContactPage from "./pages/ContactPage";
+import ToursPage from "./pages/ToursPage";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/guides" element={<GuidesPage />} />
+          <Route path="/tours" element={<ToursPage />} />
           <Route path="/travel-tips" element={<TravelTipsPage />} />
           <Route path="/tours/:slug" element={<TourDetailPage />} />
           <Route path="/search" element={<SearchResultsPage />} />
