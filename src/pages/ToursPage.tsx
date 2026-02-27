@@ -1,12 +1,19 @@
 import { useState, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { ArrowLeft, SlidersHorizontal, X } from 'lucide-react';
+import { ArrowLeft, SlidersHorizontal, X, Package, Sun, Mountain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { toursData } from '@/data/toursData';
+import { toursData, TourCategory } from '@/data/toursData';
 import { TourCard } from '@/components/TourCard';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { useLanguage } from '@/i18n/LanguageContext';
+
+const CATEGORY_TABS: { key: TourCategory | 'all'; label: string; icon: typeof Package; description: string }[] = [
+  { key: 'all', label: 'All Tours', icon: Mountain, description: 'Browse all available tours' },
+  { key: 'package', label: 'Tour Packages', icon: Package, description: 'All-inclusive premium packages' },
+  { key: 'day', label: 'Day Excursions', icon: Sun, description: 'Short 1-day trips' },
+  { key: 'multi-day', label: 'Multi-Day Tours', icon: Mountain, description: '3+ day adventures' },
+];
 
 const ACTIVITY_TYPES = [
   { key: 'trekking', label: 'Trekking' },
@@ -17,9 +24,7 @@ const ACTIVITY_TYPES = [
   { key: 'mountain-biking', label: 'Mountain Biking' },
 ];
 
-const REGIONS = [
-  'Issyk-Kul', 'Song-Kol', 'Bishkek', 'Karakol', 'Kazakhstan',
-];
+const REGIONS = ['Issyk-Kul', 'Song-Kol', 'Bishkek', 'Karakol', 'Kazakhstan'];
 
 const DURATIONS = [
   { key: '1-3', label: '1–3 Days' },
@@ -56,11 +61,11 @@ const ToursPage = () => {
   const { t } = useLanguage();
   const initialType = params.get('type') || '';
   const initialDestinations = params.get('destinations')?.split(',') || [];
-  // Map destination names to regions for filtering
   const initialRegion = initialDestinations.length === 1
     ? REGIONS.find(r => r.toLowerCase() === initialDestinations[0].toLowerCase()) || ''
     : '';
 
+  const [activeCategory, setActiveCategory] = useState<TourCategory | 'all'>('all');
   const [selectedType, setSelectedType] = useState(initialType);
   const [selectedRegion, setSelectedRegion] = useState(initialRegion);
   const [selectedDuration, setSelectedDuration] = useState('');
@@ -72,35 +77,31 @@ const ToursPage = () => {
 
   const filtered = useMemo(() => {
     return toursData.filter(tour => {
+      if (activeCategory !== 'all' && tour.category !== activeCategory) return false;
       if (selectedType && !matchesType(tour, selectedType)) return false;
-
       if (selectedRegion) {
         const loc = `${tour.location} ${tour.title}`.toLowerCase();
         if (!loc.includes(selectedRegion.toLowerCase())) return false;
       }
-
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
         const text = `${tour.title} ${tour.location} ${tour.fullDescription}`.toLowerCase();
         if (!q.split(' ').some(word => text.includes(word))) return false;
       }
-
       if (selectedDuration) {
         const days = parseDays(tour.duration);
         if (selectedDuration === '1-3' && days > 3) return false;
         if (selectedDuration === '4-7' && (days < 4 || days > 7)) return false;
         if (selectedDuration === '8+' && days < 8) return false;
       }
-
       if (selectedPrice) {
         if (selectedPrice === '0-300' && tour.price >= 300) return false;
         if (selectedPrice === '300-600' && (tour.price < 300 || tour.price > 600)) return false;
         if (selectedPrice === '600+' && tour.price < 600) return false;
       }
-
       return true;
     });
-  }, [selectedType, selectedRegion, selectedDuration, selectedPrice, searchQuery]);
+  }, [activeCategory, selectedType, selectedRegion, selectedDuration, selectedPrice, searchQuery]);
 
   const hasFilters = selectedType || selectedRegion || selectedDuration || selectedPrice || searchQuery;
 
@@ -122,30 +123,48 @@ const ToursPage = () => {
             Back to Home
           </Link>
 
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-2">
-                {selectedType ? ACTIVITY_TYPES.find(a => a.key === selectedType)?.label || 'All Tours' : 'All Tours'}
-              </h1>
-              <p className="text-muted-foreground">{filtered.length} tour{filtered.length !== 1 ? 's' : ''} found</p>
-            </div>
+          <div className="mb-8">
+            <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-2">Explore Our Tours</h1>
+            <p className="text-muted-foreground">{filtered.length} tour{filtered.length !== 1 ? 's' : ''} found</p>
+          </div>
+
+          {/* Category Tabs */}
+          <div className="flex flex-wrap gap-2 mb-8">
+            {CATEGORY_TABS.map(tab => {
+              const Icon = tab.icon;
+              const isActive = activeCategory === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveCategory(tab.key)}
+                  className={`group flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium border-2 transition-all duration-300 ${
+                    isActive
+                      ? 'bg-primary text-primary-foreground border-primary shadow-md'
+                      : 'border-border text-muted-foreground hover:border-primary/50 hover:text-foreground hover:bg-muted/50'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 transition-transform duration-200 group-hover:scale-110 ${isActive ? 'text-primary-foreground' : ''}`} />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Filters toggle */}
+          <div className="flex items-center justify-between mb-4">
             <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowFilters(!showFilters)}>
               <SlidersHorizontal className="w-4 h-4" />
               Filters
             </Button>
+            {hasFilters && (
+              <button onClick={clearFilters} className="text-sm text-primary hover:underline flex items-center gap-1">
+                <X className="w-3 h-3" /> Clear all
+              </button>
+            )}
           </div>
 
           {showFilters && (
             <div className="bg-card border border-border rounded-xl p-6 mb-8 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-semibold text-foreground">Filter Tours</h3>
-                {hasFilters && (
-                  <button onClick={clearFilters} className="text-sm text-primary hover:underline flex items-center gap-1">
-                    <X className="w-3 h-3" /> Clear all
-                  </button>
-                )}
-              </div>
-
               <div>
                 <p className="text-sm text-muted-foreground mb-2">Activity Type</p>
                 <div className="flex flex-wrap gap-2">
@@ -217,7 +236,7 @@ const ToursPage = () => {
           ) : (
             <div className="text-center py-16">
               <p className="text-lg text-muted-foreground mb-4">No tours match your filters.</p>
-              <Button onClick={clearFilters}>Clear Filters</Button>
+              <Button onClick={() => { setActiveCategory('all'); clearFilters(); }}>Clear All Filters</Button>
             </div>
           )}
         </div>
