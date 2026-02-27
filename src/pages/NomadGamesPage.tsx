@@ -218,7 +218,7 @@ const NomadGamesPage = () => {
               <div className="grid sm:grid-cols-2 gap-3">
                 {optionalExperiences.map(exp => (
                   <div key={exp} className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
-                    <Star className="w-5 h-5 text-secondary fill-secondary shrink-0" />
+                    <Star className="w-5 h-5 fill-current text-yellow-400 shrink-0" />
                     <span className="text-sm font-medium text-foreground">{exp}</span>
                   </div>
                 ))}
