@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, Instagram, Facebook, Youtube, Send } from 'lucide-react';
+import { Mail, Phone, MapPin, Instagram, Facebook, Youtube, Send, Linkedin, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/i18n/LanguageContext';
 import logoFooter from '@/assets/logo-footer-white.png';
@@ -67,8 +67,8 @@ export const Footer = () => {
             <p className="text-primary-foreground/70 text-sm mb-6 max-w-xs">{t.footer.brand.description}</p>
             <div className="space-y-2 text-sm text-primary-foreground/70">
               <p className="flex items-center gap-2"><MapPin className="w-4 h-4" />Bishkek, Kyrgyzstan</p>
-              <p className="flex items-center gap-2"><Phone className="w-4 h-4" />+996 703 404 054</p>
-              <p className="flex items-center gap-2"><Mail className="w-4 h-4" />Mountainmagictours@gmail.com</p>
+              <a href="https://wa.me/996703404054" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-primary-foreground transition-colors"><Phone className="w-4 h-4" />+996 703 404 054</a>
+              <a href="mailto:Mountainmagictours@gmail.com" className="flex items-center gap-2 hover:text-primary-foreground transition-colors"><Mail className="w-4 h-4" />Mountainmagictours@gmail.com</a>
             </div>
           </div>
 
@@ -114,9 +114,13 @@ export const Footer = () => {
         <div className="container-custom py-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-primary-foreground/50">{t.footer.copyright}</p>
           <div className="flex items-center gap-4">
-            <a href="https://www.instagram.com/mountain_magic_tours" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 hover:scale-110 transition-all duration-300"><Instagram className="w-5 h-5" /></a>
+            <a href="https://wa.me/996703404054" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 hover:scale-110 transition-all duration-300"><MessageCircle className="w-5 h-5" /></a>
+            <a href="https://www.instagram.com/mountain_magic_tours?igsh=MXdrYzZuOTB0Yzc1NQ==" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 hover:scale-110 transition-all duration-300"><Instagram className="w-5 h-5" /></a>
+            <a href="https://youtube.com/@mountainmagictours?si=qdUAWqH3eZfXk6O5" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 hover:scale-110 transition-all duration-300"><Youtube className="w-5 h-5" /></a>
             <a href="https://www.facebook.com/mountainmagictours" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 hover:scale-110 transition-all duration-300"><Facebook className="w-5 h-5" /></a>
-            <a href="https://youtube.com/@mountainmagictours" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 hover:scale-110 transition-all duration-300"><Youtube className="w-5 h-5" /></a>
+            <a href="mailto:Mountainmagictours@gmail.com" className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 hover:scale-110 transition-all duration-300"><Mail className="w-5 h-5" /></a>
+            <a href="https://linkedin.com/company/mountain-magic-tours" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 hover:scale-110 transition-all duration-300"><Linkedin className="w-5 h-5" /></a>
+            <a href="https://tripadvisor.com/mountainmagictours" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center hover:bg-primary-foreground/20 hover:scale-110 transition-all duration-300"><svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><circle cx="6.5" cy="13.5" r="2.5"/><circle cx="17.5" cy="13.5" r="2.5"/><path d="M12 2C6.48 2 2 6 2 11c0 2.76 1.12 5.26 2.93 7.07L12 22l7.07-3.93C20.88 16.26 22 13.76 22 11c0-5-4.48-9-10-9zm0 2c3.5 0 6.64 1.84 8.38 4.62A7.96 7.96 0 0017.5 8a7.96 7.96 0 00-5.5 2.2A7.96 7.96 0 006.5 8a7.96 7.96 0 00-2.88.62C5.36 5.84 8.5 4 12 4z"/></svg></a>
           </div>
         </div>
       </div>
