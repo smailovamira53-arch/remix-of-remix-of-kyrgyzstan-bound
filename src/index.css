@@ -3,6 +3,13 @@
 @tailwind utilities;
 
 @layer base {
+  h1, h2, h3, h4, h5, h6,
+  .price, .duration, .stat, .count,
+  span, p, td, th, li, dt, dd, time {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
   :root {
     /* Main brand colors - Dark Blue #1E3A5F, Light Blue #AFC7D9, White #FFF, Soft Gray #F5F7FA */
     --background: 0 0% 100%;
