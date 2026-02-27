@@ -14,6 +14,7 @@ export const es = {
     guides: 'Guías',
     signIn: 'Iniciar sesión',
     bookNow: 'Reservar ahora',
+    exploreMore: 'Descubrir más',
   },
 
   // Hero
@@ -54,6 +55,8 @@ export const es = {
     from: 'Desde',
     perPerson: '/persona',
     viewDetails: 'Ver detalles',
+    priceOnRequest: 'Precio a consultar',
+    countries: '89+ países',
   },
 
   // Tours Data
@@ -77,6 +80,11 @@ export const es = {
       title: 'Caminata de un día en Ala-Archa',
       location: 'Cerca de Biskek',
       duration: '1 día',
+    },
+    nomadGames2026: {
+      title: 'Juegos Mundiales Nómadas 2026 — Cultura nómada épica y competiciones',
+      location: 'Biskek – Issyk-Kul',
+      duration: '10 días / 9 noches',
     },
   },
 
@@ -160,6 +168,11 @@ export const es = {
     subtitle: 'Opiniones de viajeros',
     title: 'Lo que dicen nuestros huéspedes',
     description: 'Historias reales de aventureros que descubrieron la magia de Kirguistán con nosotros.',
+    items: [
+      { name: 'Sarah Mitchell', location: 'Estados Unidos', text: 'La noche en Song-Kul fue absolutamente mágica. Despertar en una yurta con caballos pastando afuera y el amanecer sobre el lago — un recuerdo que atesoraré siempre.', tour: 'Explorador de 10 días por la Ruta de la Seda' },
+      { name: 'Thomas Bergmann', location: 'Alemania', text: 'Tour increíblemente bien organizado con guías muy conocedores. La cabalgata por Jeti-Oguz superó todas las expectativas. ¡Los paisajes son sencillamente de otro mundo!', tour: 'Aventura a caballo' },
+      { name: 'Yuki Tanaka', location: 'Japón', text: 'Kirguistán no estaba en mis planes hasta que un amigo me recomendó este tour. Ahora es mi destino favorito. La hospitalidad y la belleza natural son incomparables.', tour: 'Aventura de 7 días en Issyk-Kul' },
+    ],
   },
 
   // Footer
@@ -220,6 +233,9 @@ export const es = {
     search: 'Buscar',
     noResults: 'No se encontraron tours',
     clearFilters: 'Limpiar filtros',
+    perNight: '/noche',
+    details: 'Detalles',
+    max: 'Máx.',
   },
 
   // Travel Tips Page
@@ -471,5 +487,67 @@ export const es = {
     included: 'Qué está incluido',
     notIncluded: 'No incluido',
     freeCancel: 'Cancelación gratuita hasta 48 horas antes',
+  },
+
+  // Accommodations Page
+  accommodations: {
+    heroBadge: '🏠 Verificado e inspeccionado',
+    heroTitle: 'Alojamientos verificados en todo Kirguistán',
+    heroSubtitle: 'Hoteles, yurtas y eco-lodges — seleccionados a mano para calidad, confort y experiencia auténtica',
+    marketingTitle: 'Reserva con nosotros — Obtén más por menos',
+    marketingDescription: 'Inspeccionamos personalmente cada propiedad. Reserva a través de Mountain Magic Tours y obtén beneficios exclusivos que no encontrarás en Booking.com ni Airbnb. Apoya los negocios locales directamente.',
+    perks: {
+      discount: '10–15% de descuento sobre tarifas',
+      transfer: 'Traslado gratuito desde el aeropuerto Manas',
+      support: 'Soporte 24/7 en KG/RU/EN',
+      bestPrice: 'Garantía de mejor precio',
+    },
+    filters: {
+      region: 'Región',
+      type: 'Tipo',
+      all: 'Todos',
+      allTypes: 'Todos los tipos',
+      hotels: 'Hoteles',
+      yurtCamps: 'Campamentos de yurtas',
+      guesthouses: 'Casas de huéspedes',
+      resorts: 'Resorts',
+      ecoLodges: 'Eco lodges',
+    },
+    propertiesFound: '{count} propiedades encontradas',
+    propertyFound: '{count} propiedad encontrada',
+    bookSave: 'Reservar y ahorrar',
+    noResults: 'No hay propiedades que coincidan con tus filtros.',
+  },
+
+  // Expeditions Page
+  expeditions: {
+    heroBadge: '🏔️ Para verdaderos aventureros',
+    heroTitle: 'Expediciones extremas en Kirguistán',
+    heroSubtitle: 'Altas cumbres, escaladas técnicas, naturaleza remota — supera tus límites en el corazón de Asia Central',
+    sectionTitle: 'Nuestras expediciones',
+    sectionDescription: 'Elige tu desafío — desde trekkings moderados hasta ascensos de nivel experto',
+    whyTitle: 'Por qué elegir nuestras expediciones',
+    whyDescription: 'Combinamos experiencia de montañismo de clase mundial con profundo conocimiento local',
+    ctaTitle: '¿Listo para el desafío?',
+    ctaDescription: 'Contáctanos para discutir tus objetivos de expedición — crearemos un plan personalizado para tu equipo.',
+    ctaButton: 'Contáctanos',
+    difficulty: {
+      moderate: 'Moderada',
+      hard: 'Difícil',
+      expert: 'Experto',
+    },
+    whyItems: {
+      guides: { title: 'Guías profesionales', description: 'Montañeros certificados con más de 10 años de experiencia en altitud en las cordilleras de Tien Shan y Pamir.' },
+      safety: { title: 'Seguridad ante todo', description: 'Protocolos de seguridad integrales, comunicación satelital, botiquines médicos y planes de evacuación.' },
+      groups: { title: 'Grupos pequeños', description: 'Máximo 6–10 participantes por expedición para atención personalizada e impacto ambiental mínimo.' },
+      permits: { title: 'Todos los permisos incluidos', description: 'Permisos de zona fronteriza, tarifas de parques nacionales y todo el papeleo gestionado por nuestro equipo.' },
+    },
+    items: [
+      { title: 'Expedición al campo base del Pico Lenin', location: 'Pamir-Alay, Región de Osh', duration: '21 días', description: 'Trek al campo base del Pico Lenin (7.134m), uno de los setesímiles más accesibles del mundo.' },
+      { title: 'Ascenso al Khan Tengri', location: 'Tien Shan Central', duration: '18 días', description: 'Intenta la impresionante pirámide de mármol del Khan Tengri (7.010m). Escalada técnica en hielo y nieve.' },
+      { title: 'Tien Shan: Helicóptero + Trek', location: 'Glaciar Inylchek', duration: '7 días', description: 'Vuela en helicóptero al corazón del Tien Shan, luego camina por valles glaciares prístinos.' },
+      { title: 'Montañismo de varios días en la cordillera Ala-Too', location: 'Kyrgyz Ala-Too, Biskek', duration: '10 días', description: 'Escala múltiples picos en la cordillera Ala-Too justo sobre Biskek.' },
+      { title: 'Expedición por la carretera del Pamir', location: 'Osh – Pamir – Dusambé', duration: '14 días', description: 'Recorre la legendaria Carretera del Pamir — la segunda carretera internacional más alta del mundo.' },
+    ],
   },
 };

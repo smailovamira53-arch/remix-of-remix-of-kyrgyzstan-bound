@@ -107,7 +107,7 @@ export const Navbar = () => {
               onMouseLeave={() => setActiveSubmenu(null)}
             >
               <button className="nav-link px-3 xl:px-4 py-2 text-sm font-medium flex items-center gap-1 whitespace-nowrap">
-                {'Explore More'}
+                {t.nav.exploreMore || 'Explore More'}
                 <ChevronDown className="w-3 h-3" />
               </button>
               <AnimatePresence>

@@ -14,6 +14,7 @@ export const en = {
     guides: 'Guides',
     signIn: 'Sign In',
     bookNow: 'Book Now',
+    exploreMore: 'Explore More',
   },
 
   // Hero
@@ -54,6 +55,8 @@ export const en = {
     from: 'From',
     perPerson: '/person',
     viewDetails: 'View Details',
+    priceOnRequest: 'Price available upon request',
+    countries: '89+ Countries',
   },
 
   // Tours Data
@@ -77,6 +80,11 @@ export const en = {
       title: 'Ala-Archa National Park Day Hike',
       location: 'Near Bishkek',
       duration: '1 Day',
+    },
+    nomadGames2026: {
+      title: 'World Nomad Games 2026 – Epic Nomadic Culture & Competitions',
+      location: 'Bishkek – Issyk-Kul',
+      duration: '10 Days / 9 Nights',
     },
   },
 
@@ -160,6 +168,11 @@ export const en = {
     subtitle: 'Traveler Reviews',
     title: 'What Our Guests Say',
     description: 'Real stories from adventurers who discovered the magic of Kyrgyzstan with us.',
+    items: [
+      { name: 'Sarah Mitchell', location: 'United States', text: 'The Song-Kul overnight experience was absolutely magical. Waking up in a yurt with horses grazing outside and the sunrise over the lake – it\'s a memory I\'ll cherish forever.', tour: '10-Day Silk Road Explorer' },
+      { name: 'Thomas Bergmann', location: 'Germany', text: 'Incredibly well-organized tour with knowledgeable guides. The Jeti-Oguz horse trek exceeded all expectations. The landscapes are simply otherworldly!', tour: 'Horse Trekking Adventure' },
+      { name: 'Yuki Tanaka', location: 'Japan', text: 'Kyrgyzstan was not on my radar until a friend recommended this tour. Now it\'s my favorite travel destination. The hospitality and natural beauty are unmatched.', tour: '7-Day Issyk-Kul Adventure' },
+    ],
   },
 
   // Footer
@@ -220,6 +233,9 @@ export const en = {
     search: 'Search',
     noResults: 'No tours found',
     clearFilters: 'Clear Filters',
+    perNight: '/night',
+    details: 'Details',
+    max: 'Max',
   },
 
   // Travel Tips Page
@@ -479,5 +495,67 @@ export const en = {
     included: "What's Included",
     notIncluded: 'Not Included',
     freeCancel: 'Free cancellation up to 48 hours before',
+  },
+
+  // Accommodations Page
+  accommodations: {
+    heroBadge: '🏠 Verified & Inspected',
+    heroTitle: 'Verified Stays Across Kyrgyzstan',
+    heroSubtitle: 'Hotels, Yurts & Eco Lodges — hand-picked for quality, comfort, and authentic experience',
+    marketingTitle: 'Book Through Us — Get More for Less',
+    marketingDescription: 'We personally inspect every property. Book through Mountain Magic Tours and get exclusive perks you won\'t find on Booking.com or Airbnb. Support local businesses directly.',
+    perks: {
+      discount: '10–15% discount off rack rates',
+      transfer: 'Free Manas airport transfer',
+      support: '24/7 support in KG/RU/EN',
+      bestPrice: 'Best price guarantee',
+    },
+    filters: {
+      region: 'Region',
+      type: 'Type',
+      all: 'All',
+      allTypes: 'All Types',
+      hotels: 'Hotels',
+      yurtCamps: 'Yurt Camps',
+      guesthouses: 'Guesthouses',
+      resorts: 'Resorts',
+      ecoLodges: 'Eco Lodges',
+    },
+    propertiesFound: '{count} properties found',
+    propertyFound: '{count} property found',
+    bookSave: 'Book & Save',
+    noResults: 'No properties match your filters.',
+  },
+
+  // Expeditions Page
+  expeditions: {
+    heroBadge: '🏔️ For Real Adventurers',
+    heroTitle: 'Extreme Expeditions in Kyrgyzstan',
+    heroSubtitle: 'High peaks, technical climbs, remote wilderness — push your limits in the heart of Central Asia',
+    sectionTitle: 'Our Expeditions',
+    sectionDescription: 'Choose your challenge — from moderate treks to expert-level summit attempts',
+    whyTitle: 'Why Choose Our Expeditions',
+    whyDescription: 'We combine world-class mountaineering expertise with deep local knowledge',
+    ctaTitle: 'Ready for the Challenge?',
+    ctaDescription: 'Contact us to discuss your expedition goals — we\'ll build a custom plan for your team.',
+    ctaButton: 'Get in Touch',
+    difficulty: {
+      moderate: 'Moderate',
+      hard: 'Hard',
+      expert: 'Expert',
+    },
+    whyItems: {
+      guides: { title: 'Professional Guides', description: 'Certified mountaineers with 10+ years of high-altitude experience in the Tien Shan and Pamir ranges.' },
+      safety: { title: 'Safety First', description: 'Comprehensive safety protocols, satellite communication, medical kits, and evacuation plans on every expedition.' },
+      groups: { title: 'Small Groups', description: 'Maximum 6–10 participants per expedition for personalized attention and minimal environmental impact.' },
+      permits: { title: 'All Permits Included', description: 'Border zone permits, national park fees, and all bureaucratic paperwork handled by our team.' },
+    },
+    items: [
+      { title: 'Peak Lenin Base Camp Expedition', location: 'Pamir-Alay, Osh Region', duration: '21 Days', description: 'Trek to the base camp of Peak Lenin (7,134m), one of the most accessible 7,000m peaks in the world.' },
+      { title: 'Khan Tengri Summit Climb', location: 'Central Tien Shan', duration: '18 Days', description: 'Attempt the stunning marble pyramid of Khan Tengri (7,010m). Technical ice and snow climbing.' },
+      { title: 'Tien Shan Helicopter + Trek Combo', location: 'Inylchek Glacier', duration: '7 Days', description: 'Fly by helicopter deep into the Tien Shan range, then trek through pristine glacial valleys.' },
+      { title: 'Ala-Too Range Multi-Day Mountaineering', location: 'Kyrgyz Ala-Too, Bishkek', duration: '10 Days', description: 'Climb multiple peaks in the Kyrgyz Ala-Too range right above Bishkek.' },
+      { title: 'Pamir Highway Overland Expedition', location: 'Osh – Pamir – Dushanbe', duration: '14 Days', description: 'Drive the legendary Pamir Highway — the second-highest international road in the world.' },
+    ],
   },
 };
