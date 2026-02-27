@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Clock, ArrowRight } from 'lucide-react';
 import { SectionHeader } from './SectionHeader';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { BookingFormModal } from './BookingFormModal';
 
 import tourBurana from '@/assets/tour-burana.jpg';
 import tourHorseTrek from '@/assets/tour-horse-trek.jpg';
@@ -10,6 +12,7 @@ import tourSongKul from '@/assets/tour-song-kul.jpg';
 
 export const Excursions = () => {
   const { t } = useLanguage();
+  const [booking, setBooking] = useState<{ title: string; price: number } | null>(null);
 
   const excursions = [
     { image: tourBurana, title: t.excursions.burana.title, description: t.excursions.burana.description, duration: t.excursions.burana.duration, price: 45 },
@@ -32,13 +35,16 @@ export const Excursions = () => {
                 <p className="text-primary-foreground/80 text-sm mb-4 line-clamp-2">{excursion.description}</p>
                 <div className="flex items-center justify-between">
                   <p className="text-primary-foreground"><span className="text-2xl font-bold">${excursion.price}</span><span className="text-sm opacity-80">{t.common.perPerson}</span></p>
-                  <Button size="sm" variant="heroOutline" className="opacity-0 group-hover:opacity-100 transition-opacity gap-1">{t.nav.bookNow}<ArrowRight className="w-3 h-3" /></Button>
+                  <Button size="sm" variant="heroOutline" className="opacity-0 group-hover:opacity-100 transition-opacity gap-1" onClick={() => setBooking({ title: excursion.title, price: excursion.price })}>{t.nav.bookNow}<ArrowRight className="w-3 h-3" /></Button>
                 </div>
               </div>
             </motion.div>
           ))}
         </div>
       </div>
+      {booking && (
+        <BookingFormModal open={!!booking} onClose={() => setBooking(null)} tourTitle={booking.title} tourPrice={booking.price} />
+      )}
     </section>
   );
 };

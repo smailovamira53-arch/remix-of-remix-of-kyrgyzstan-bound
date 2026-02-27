@@ -1,10 +1,20 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { BookingFormModal } from './BookingFormModal';
 
 export const AdventurePass = () => {
   const { t } = useLanguage();
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [selectedPrice, setSelectedPrice] = useState(299);
+
+  const options = [
+    { days: '3', price: 299, popular: false },
+    { days: '7', price: 499, popular: true },
+    { days: '14', price: 749, popular: false },
+  ];
 
   return (
     <section className="section-padding bg-primary relative overflow-hidden">
@@ -30,33 +40,34 @@ export const AdventurePass = () => {
                 </li>
               ))}
             </ul>
-            <Button variant="accent" size="xl" className="gap-2">{t.adventurePass.getPass}<Sparkles className="w-4 h-4" /></Button>
+            <Button variant="accent" size="xl" className="gap-2" onClick={() => { setSelectedPrice(299); setBookingOpen(true); }}>{t.adventurePass.getPass}<Sparkles className="w-4 h-4" /></Button>
           </motion.div>
           <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.2 }} className="relative">
             <div className="bg-card rounded-3xl p-8 md:p-10 shadow-xl relative overflow-hidden">
               <div className="absolute -top-10 -right-10 w-40 h-40 bg-secondary/20 rounded-full blur-3xl" />
               <div className="relative">
                 <p className="text-sm text-muted-foreground uppercase tracking-wider mb-2">{t.adventurePass.startingFrom}</p>
-                <div className="flex items-baseline gap-2 mb-6"><span className="text-5xl md:text-6xl font-display font-bold text-foreground">$299</span><span className="text-muted-foreground">/3 {t.adventurePass.days}</span></div>
+                <div className="flex items-baseline gap-2 mb-6"><span className="text-5xl md:text-6xl font-display font-bold text-foreground">${selectedPrice}</span><span className="text-muted-foreground">/{options.find(o => o.price === selectedPrice)?.days || '3'} {t.adventurePass.days}</span></div>
                 <div className="space-y-4 mb-8">
-                  {[{ days: '3', price: '$299', popular: false }, { days: '7', price: '$499', popular: true }, { days: '14', price: '$749', popular: false }].map((option) => (
-                    <div key={option.days} className={`flex items-center justify-between p-4 rounded-xl border-2 transition-colors cursor-pointer ${option.popular ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}>
+                  {options.map((option) => (
+                    <div key={option.days} onClick={() => setSelectedPrice(option.price)} className={`flex items-center justify-between p-4 rounded-xl border-2 transition-colors cursor-pointer ${option.price === selectedPrice ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}>
                       <div className="flex items-center gap-3">
-                        <div className={`w-4 h-4 rounded-full border-2 ${option.popular ? 'border-primary bg-primary' : 'border-muted-foreground'}`} />
+                        <div className={`w-4 h-4 rounded-full border-2 ${option.price === selectedPrice ? 'border-primary bg-primary' : 'border-muted-foreground'}`} />
                         <span className="font-medium text-foreground">{option.days} {t.adventurePass.days}</span>
                         {option.popular && (<span className="text-xs font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">{t.adventurePass.mostPopular}</span>)}
                       </div>
-                      <span className="font-bold text-foreground">{option.price}</span>
+                      <span className="font-bold text-foreground">${option.price}</span>
                     </div>
                   ))}
                 </div>
-                <Button className="w-full" size="lg">{t.adventurePass.purchaseNow}</Button>
+                <Button className="w-full" size="lg" onClick={() => setBookingOpen(true)}>{t.adventurePass.purchaseNow}</Button>
                 <p className="text-center text-xs text-muted-foreground mt-4">{t.adventurePass.cancellation}</p>
               </div>
             </div>
           </motion.div>
         </div>
       </div>
+      <BookingFormModal open={bookingOpen} onClose={() => setBookingOpen(false)} tourTitle={`Adventure Pass (${options.find(o => o.price === selectedPrice)?.days || '3'} days)`} tourPrice={selectedPrice} />
     </section>
   );
 };
