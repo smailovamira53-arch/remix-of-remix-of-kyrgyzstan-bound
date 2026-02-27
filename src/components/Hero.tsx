@@ -74,10 +74,6 @@ export const Hero = () => {
 
           <p className="text-lg md:text-xl text-primary-foreground/90 mb-10 max-w-2xl mx-auto">{t.hero.description}</p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-            <Button variant="hero" size="xl">{t.hero.exploreTours}</Button>
-            <Button variant="heroOutline" size="xl">{t.hero.planTrip}</Button>
-          </div>
         </motion.div>
 
         {/* Slide indicators */}
