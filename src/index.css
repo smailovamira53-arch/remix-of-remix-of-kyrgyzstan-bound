@@ -116,9 +116,10 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', serif;
-    @apply font-bold tracking-tight;
-    font-weight: 700;
+    font-family: 'Poppins', sans-serif;
+    @apply font-semibold;
+    font-weight: 600;
+    letter-spacing: 0.5px;
   }
 }
 
