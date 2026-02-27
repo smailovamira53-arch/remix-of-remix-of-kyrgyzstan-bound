@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Instagram, Facebook, Youtube, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/i18n/LanguageContext';
-import logoFooter from '@/assets/logo-footer-white.png';
+import logoFooter from '@/assets/logo-mmt-new.png';
 
 export const Footer = () => {
   const { t } = useLanguage();

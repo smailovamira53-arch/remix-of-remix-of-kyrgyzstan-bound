@@ -5,7 +5,7 @@ import { Menu, X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useLanguage } from '@/i18n/LanguageContext';
-import logoMmt from '@/assets/logo-header-blue.png';
+import logoMmt from '@/assets/logo-mmt-new.png';
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,7 +23,7 @@ export const Navbar = () => {
         { label: t.nav.multiDayTours, href: '/tours/multi-day' },
       ]
     },
-    { label: t.nav.adventure, href: '/adventure' },
+    { label: t.nav.adventure || 'Expeditions', href: '/adventure' },
     { label: t.nav.guides || 'Guides', href: '/guides' },
     { label: t.nav.travelTips || 'Travel Tips', href: '/travel-tips' },
     { label: t.nav.accommodations, href: '/accommodations' },
@@ -40,7 +40,7 @@ export const Navbar = () => {
             <img 
               src={logoMmt} 
               alt="Mountain Magic Tours" 
-              className="h-[50px] md:h-[58px] w-auto object-contain"
+              className="h-[40px] md:h-[54px] w-auto max-w-[180px] md:max-w-[250px] object-contain"
             />
           </Link>
 
@@ -53,10 +53,10 @@ export const Navbar = () => {
                 onMouseEnter={() => item.submenu && setActiveSubmenu(item.label)}
                 onMouseLeave={() => setActiveSubmenu(null)}
               >
-                <Link
-                  to={item.href}
-                  className="nav-link px-4 py-2 text-sm font-medium flex items-center gap-1"
-                >
+                  <Link
+                    to={item.href}
+                    className={`nav-link px-4 py-2 text-sm font-medium flex items-center gap-1 ${item.href === '/contact' ? 'bg-primary text-primary-foreground rounded-lg hover:bg-primary/90' : ''}`}
+                  >
                   {item.label}
                   {item.submenu && <ChevronDown className="w-3 h-3" />}
                 </Link>
@@ -89,15 +89,9 @@ export const Navbar = () => {
             ))}
           </div>
 
-          {/* CTA Buttons & Language Switcher */}
+          {/* Language Switcher */}
           <div className={`hidden lg:flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <LanguageSwitcher />
-            <Button variant="ghost" size="sm">
-              {t.nav.signIn}
-            </Button>
-            <Button variant="default" size="sm">
-              {t.nav.bookNow}
-            </Button>
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -148,14 +142,6 @@ export const Navbar = () => {
                   )}
                 </div>
               ))}
-              <div className="pt-4 space-y-2 border-t border-border">
-                <Button variant="outline" className="w-full">
-                  {t.nav.signIn}
-                </Button>
-                <Button className="w-full">
-                  {t.nav.bookNow}
-                </Button>
-              </div>
             </div>
           </motion.div>
         )}
