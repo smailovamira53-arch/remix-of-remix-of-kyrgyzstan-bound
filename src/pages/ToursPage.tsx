@@ -55,11 +55,19 @@ const ToursPage = () => {
   const [params] = useSearchParams();
   const { t } = useLanguage();
   const initialType = params.get('type') || '';
+  const initialDestinations = params.get('destinations')?.split(',') || [];
+  // Map destination names to regions for filtering
+  const initialRegion = initialDestinations.length === 1
+    ? REGIONS.find(r => r.toLowerCase() === initialDestinations[0].toLowerCase()) || ''
+    : '';
 
   const [selectedType, setSelectedType] = useState(initialType);
-  const [selectedRegion, setSelectedRegion] = useState('');
+  const [selectedRegion, setSelectedRegion] = useState(initialRegion);
   const [selectedDuration, setSelectedDuration] = useState('');
   const [selectedPrice, setSelectedPrice] = useState('');
+  const [searchQuery, setSearchQuery] = useState(
+    initialDestinations.length > 0 && !initialRegion ? initialDestinations.join(' ') : ''
+  );
   const [showFilters, setShowFilters] = useState(true);
 
   const filtered = useMemo(() => {
@@ -69,6 +77,12 @@ const ToursPage = () => {
       if (selectedRegion) {
         const loc = `${tour.location} ${tour.title}`.toLowerCase();
         if (!loc.includes(selectedRegion.toLowerCase())) return false;
+      }
+
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const text = `${tour.title} ${tour.location} ${tour.fullDescription}`.toLowerCase();
+        if (!q.split(' ').some(word => text.includes(word))) return false;
       }
 
       if (selectedDuration) {
@@ -86,15 +100,16 @@ const ToursPage = () => {
 
       return true;
     });
-  }, [selectedType, selectedRegion, selectedDuration, selectedPrice]);
+  }, [selectedType, selectedRegion, selectedDuration, selectedPrice, searchQuery]);
 
-  const hasFilters = selectedType || selectedRegion || selectedDuration || selectedPrice;
+  const hasFilters = selectedType || selectedRegion || selectedDuration || selectedPrice || searchQuery;
 
   const clearFilters = () => {
     setSelectedType('');
     setSelectedRegion('');
     setSelectedDuration('');
     setSelectedPrice('');
+    setSearchQuery('');
   };
 
   return (
