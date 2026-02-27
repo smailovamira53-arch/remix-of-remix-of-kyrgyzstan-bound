@@ -1,0 +1,209 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Main brand colors - Dark Blue #1E3A5F, Light Blue #AFC7D9, White #FFF, Soft Gray #F5F7FA */
+    --background: 0 0% 100%;
+    --foreground: 214 52% 24%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 214 52% 24%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 214 52% 24%;
+
+    /* Dark Blue #1E3A5F */
+    --primary: 214 52% 24%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Light Blue #AFC7D9 */
+    --secondary: 207 33% 77%;
+    --secondary-foreground: 214 52% 24%;
+
+    --muted: 213 33% 97%;
+    --muted-foreground: 214 20% 45%;
+
+    /* Light Blue accent */
+    --accent: 207 33% 77%;
+    --accent-foreground: 214 52% 24%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 213 20% 90%;
+    --input: 213 20% 90%;
+    --ring: 214 52% 24%;
+
+    --radius: 0.75rem;
+
+    /* Custom colors */
+    --lake-deep: 214 52% 24%;
+    --lake-light: 207 33% 77%;
+    --mountain: 214 40% 30%;
+    --snow: 213 33% 97%;
+    --sand: 213 33% 97%;
+    --sunset: 207 33% 77%;
+
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(214 52% 24% / 0.9), hsl(207 33% 77% / 0.8));
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(213 33% 97%));
+    --gradient-sunset: linear-gradient(135deg, hsl(207 33% 77%), hsl(214 52% 24%));
+
+    /* Shadows */
+    --shadow-sm: 0 2px 8px -2px hsl(214 52% 24% / 0.08);
+    --shadow-md: 0 8px 24px -8px hsl(214 52% 24% / 0.12);
+    --shadow-lg: 0 16px 48px -12px hsl(214 52% 24% / 0.16);
+    --shadow-glow: 0 0 40px hsl(214 52% 24% / 0.15);
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 220 25% 8%;
+    --foreground: 210 30% 96%;
+
+    --card: 220 20% 12%;
+    --card-foreground: 210 30% 96%;
+
+    --popover: 220 20% 12%;
+    --popover-foreground: 210 30% 96%;
+
+    --primary: 185 55% 50%;
+    --primary-foreground: 220 25% 8%;
+
+    --secondary: 35 75% 50%;
+    --secondary-foreground: 220 25% 8%;
+
+    --muted: 220 20% 18%;
+    --muted-foreground: 210 15% 60%;
+
+    --accent: 160 40% 45%;
+    --accent-foreground: 220 25% 8%;
+
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 20% 20%;
+    --input: 220 20% 20%;
+    --ring: 185 55% 50%;
+
+    --lake-deep: 185 60% 45%;
+    --lake-light: 185 40% 20%;
+    --mountain: 160 30% 30%;
+    --snow: 220 20% 15%;
+    --sand: 40 20% 15%;
+    --sunset: 25 80% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 400;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+    @apply font-bold tracking-tight;
+    font-weight: 700;
+  }
+}
+
+@layer components {
+  .nav-link {
+    @apply relative text-foreground/80 hover:text-foreground transition-colors duration-200;
+  }
+
+  .nav-link::after {
+    @apply content-[''] absolute left-0 bottom-0 w-0 h-0.5 bg-primary transition-all duration-300;
+  }
+
+  .nav-link:hover::after {
+    @apply w-full;
+  }
+
+  .hero-gradient {
+    background: linear-gradient(
+      180deg,
+      hsl(220 20% 15% / 0) 0%,
+      hsl(220 20% 15% / 0.4) 50%,
+      hsl(220 20% 15% / 0.8) 100%
+    );
+  }
+
+  .card-hover {
+    @apply transition-all duration-500 ease-out;
+  }
+
+  .card-hover:hover {
+    @apply -translate-y-2;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+  }
+
+  .section-padding {
+    @apply py-16 md:py-24 lg:py-32;
+  }
+
+  .container-custom {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.8s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.5s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { 
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to { 
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from { 
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to { 
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
