@@ -5,7 +5,7 @@ import { Menu, X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useLanguage } from '@/i18n/LanguageContext';
-import logoMmt from '@/assets/logo-mmt-new.png';
+import logoMmt from '@/assets/logo-header-blue.png';
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -40,7 +40,7 @@ export const Navbar = () => {
             <img 
               src={logoMmt} 
               alt="Mountain Magic Tours" 
-              className="h-[36px] md:h-[54px] w-auto max-w-[220px] md:max-w-[450px] object-contain"
+              className="h-[50px] md:h-[58px] w-auto object-contain"
             />
           </Link>
 
