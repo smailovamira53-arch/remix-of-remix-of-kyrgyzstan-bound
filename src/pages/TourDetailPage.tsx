@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Clock, MapPin, Star, Users, Check, X, Calendar } from 'lucide-react';
+import { ArrowLeft, Clock, MapPin, Star, Users, Check, X, Calendar, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { getTourBySlug } from '@/data/toursData';
 import { TourGallery } from '@/components/TourGallery';
 import { BookingFormModal } from '@/components/BookingFormModal';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
 
 const TourDetailPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -17,7 +19,21 @@ const TourDetailPage = () => {
   const { t } = useLanguage();
   
   const [bookingOpen, setBookingOpen] = useState(false);
+  const [dbTour, setDbTour] = useState<{ start_date: string | null; end_date: string | null; status: string; current_bookings: number } | null>(null);
   const tour = slug ? getTourBySlug(slug) : undefined;
+
+  useEffect(() => {
+    if (tour) {
+      supabase
+        .from('tours')
+        .select('start_date, end_date, status, current_bookings')
+        .eq('title', tour.title)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data) setDbTour(data);
+        });
+    }
+  }, [tour]);
 
   if (!tour) {
     return (
@@ -210,6 +226,56 @@ const TourDetailPage = () => {
                 </CardContent>
               </Card>
             </motion.div>
+
+            {/* Tour Schedule & Status */}
+            {dbTour && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="bg-card rounded-2xl p-6 md:p-8 shadow-lg border border-border"
+              >
+                <h2 className="font-display text-xl font-bold text-foreground mb-4 flex items-center gap-2">
+                  <Info className="w-5 h-5 text-primary" />
+                  Tour Schedule & Status
+                </h2>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {dbTour.start_date && (
+                    <div className="flex items-center gap-3">
+                      <Calendar className="w-5 h-5 text-primary" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">Start Date</p>
+                        <p className="font-semibold text-foreground">{new Date(dbTour.start_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                      </div>
+                    </div>
+                  )}
+                  {dbTour.end_date && (
+                    <div className="flex items-center gap-3">
+                      <Calendar className="w-5 h-5 text-primary" />
+                      <div>
+                        <p className="text-xs text-muted-foreground">End Date</p>
+                        <p className="font-semibold text-foreground">{new Date(dbTour.end_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-3">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Status</p>
+                      <Badge variant={dbTour.status === 'Open' ? 'default' : dbTour.status === 'Almost Full' ? 'secondary' : 'destructive'}>
+                        {dbTour.status}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Users className="w-5 h-5 text-primary" />
+                    <div>
+                      <p className="text-xs text-muted-foreground">Current Bookings</p>
+                      <p className="font-semibold text-foreground">{dbTour.current_bookings}</p>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
           </div>
 
           {/* Sidebar - Booking Card */}

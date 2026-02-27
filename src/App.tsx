@@ -14,6 +14,7 @@ import AboutKyrgyzstanPage from "./pages/AboutKyrgyzstanPage";
 import ContactPage from "./pages/ContactPage";
 import ToursPage from "./pages/ToursPage";
 import AdminPage from "./pages/AdminPage";
+import NomadGamesPage from "./pages/NomadGamesPage";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/guides" element={<GuidesPage />} />
           <Route path="/tours" element={<ToursPage />} />
           <Route path="/travel-tips" element={<TravelTipsPage />} />
+          <Route path="/tours/world-nomad-games-2026" element={<NomadGamesPage />} />
           <Route path="/tours/:slug" element={<TourDetailPage />} />
           <Route path="/search" element={<SearchResultsPage />} />
           <Route path="/about" element={<AboutKyrgyzstanPage />} />
