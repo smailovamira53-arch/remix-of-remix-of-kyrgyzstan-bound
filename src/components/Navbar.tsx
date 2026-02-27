@@ -23,7 +23,7 @@ export const Navbar = () => {
         { label: t.nav.multiDayTours, href: '/tours/multi-day' },
       ]
     },
-    { label: t.nav.adventure || 'Expeditions', href: '/adventure' },
+    { label: t.nav.adventure || 'Expeditions', href: '/expeditions' },
     { label: t.nav.guides || 'Guides', href: '/guides' },
     { label: t.nav.travelTips || 'Travel Tips', href: '/travel-tips' },
     { label: t.nav.accommodations, href: '/accommodations' },
