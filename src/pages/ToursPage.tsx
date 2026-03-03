@@ -7,30 +7,22 @@ import { TourCard } from '@/components/TourCard';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { useTours } from '@/hooks/useTours';
 
 const REGIONS = ['Issyk-Kul', 'Song-Kol', 'Bishkek', 'Karakol', 'Kazakhstan'];
 
-const matchesType = (tour: typeof toursData[0], type: string) => {
-  const text = `${tour.title} ${tour.fullDescription} ${tour.highlights.join(' ')}`.toLowerCase();
-  const map: Record<string, string[]> = {
-    'trekking': ['trek', 'hike', 'hiking', 'trekking'],
-    'horse-riding': ['horse', 'horseback', 'riding'],
-    'ski-touring': ['ski', 'snow', 'winter'],
-    'yurt-camping': ['yurt', 'camp', 'camping'],
-    'photography': ['photo', 'photography', 'camera'],
-    'mountain-biking': ['bike', 'biking', 'cycling'],
-  };
-  return (map[type] || []).some(kw => text.includes(kw));
-};
-
-const parseDays = (duration: string): number => {
+const parseDays = (duration: string | number | null): number => {
+  if (!duration) return 0;
+  if (typeof duration === 'number') return duration;
   const m = duration.match(/(\d+)/);
   return m ? parseInt(m[1]) : 0;
 };
 
 const ToursPage = () => {
   const [params] = useSearchParams();
-  const { t, isRTL } = useLanguage();
+  const { t, language, isRTL } = useLanguage();
+  const { data: dbTours = [], isLoading } = useTours();
+
   const initialType = params.get('type') || '';
   const initialDestinations = params.get('destinations')?.split(',') || [];
   const initialRegion = initialDestinations.length === 1
@@ -45,22 +37,11 @@ const ToursPage = () => {
   const [searchQuery, setSearchQuery] = useState(
     initialDestinations.length > 0 && !initialRegion ? initialDestinations.join(' ') : ''
   );
-  const [showFilters, setShowFilters] = useState(true);
-
-  const CATEGORY_TABS: { key: TourCategory | 'all'; label: string; icon: typeof Package }[] = [
+  const [showFilters, setShowFilters] = useState(true);const CATEGORY_TABS: { key: TourCategory | 'all'; label: string; icon: typeof Package }[] = [
     { key: 'all', label: t.toursPage.categories.all, icon: Mountain },
     { key: 'package', label: t.toursPage.categories.packages, icon: Package },
     { key: 'day', label: t.toursPage.categories.dayExcursions, icon: Sun },
     { key: 'multi-day', label: t.toursPage.categories.multiDay, icon: Mountain },
-  ];
-
-  const ACTIVITY_TYPES = [
-    { key: 'trekking', label: t.toursPage.activities.trekking },
-    { key: 'horse-riding', label: t.toursPage.activities.horseRiding },
-    { key: 'ski-touring', label: t.toursPage.activities.skiTouring },
-    { key: 'yurt-camping', label: t.toursPage.activities.yurtCamping },
-    { key: 'photography', label: t.toursPage.activities.photography },
-    { key: 'mountain-biking', label: t.toursPage.activities.mountainBiking },
   ];
 
   const DURATIONS = [
@@ -75,17 +56,40 @@ const ToursPage = () => {
     { key: '600+', label: t.toursPage.priceRanges.over600 },
   ];
 
+  const dbToursFormatted = useMemo(() => {
+    return dbTours.map(tour => ({
+      slug: tour.slug || tour.id,
+      image: tour.cover_image || 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&h=600&fit=crop',
+      title: language === 'ru' ? (tour.title_ru || tour.title_en)
+           : language === 'es' ? (tour.title_es || tour.title_en)
+           : language === 'ar' ? (tour.title_ar || tour.title_en)
+           : tour.title_en,
+      location: 'Kyrgyzstan',
+      duration: tour.duration_days ? `${tour.duration_days} Days` : '1 Day',
+      price: tour.price || 0,
+      rating: 5.0,
+      reviewCount: 0,
+      featured: tour.is_featured || false,
+      category: 'package' as TourCategory,
+      isFromDB: true,
+    }));
+  }, [dbTours, language]);
+
+  const allTours = useMemo(() => {
+    const staticTours = toursData.map(t => ({ ...t, isFromDB: false }));
+    return [...dbToursFormatted, ...staticTours];
+  }, [dbToursFormatted]);
+
   const filtered = useMemo(() => {
-    return toursData.filter(tour => {
+    return allTours.filter(tour => {
       if (activeCategory !== 'all' && tour.category !== activeCategory) return false;
-      if (selectedType && !matchesType(tour, selectedType)) return false;
       if (selectedRegion) {
         const loc = `${tour.location} ${tour.title}`.toLowerCase();
         if (!loc.includes(selectedRegion.toLowerCase())) return false;
       }
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
-        const text = `${tour.title} ${tour.location} ${tour.fullDescription}`.toLowerCase();
+        const text = `${tour.title} ${tour.location}`.toLowerCase();
         if (!q.split(' ').some(word => text.includes(word))) return false;
       }
       if (selectedDuration) {
@@ -101,7 +105,7 @@ const ToursPage = () => {
       }
       return true;
     });
-  }, [activeCategory, selectedType, selectedRegion, selectedDuration, selectedPrice, searchQuery]);
+  }, [allTours, activeCategory, selectedRegion, selectedDuration, selectedPrice, searchQuery]);
 
   const hasFilters = selectedType || selectedRegion || selectedDuration || selectedPrice || searchQuery;
 
@@ -111,9 +115,7 @@ const ToursPage = () => {
     setSelectedDuration('');
     setSelectedPrice('');
     setSearchQuery('');
-  };
-
-  return (
+  };return (
     <div className={`min-h-screen bg-background ${isRTL ? 'rtl' : 'ltr'}`}>
       <Navbar />
       <main className="pt-32 pb-16">
@@ -122,35 +124,27 @@ const ToursPage = () => {
             <ArrowLeft className="w-4 h-4" />
             {t.toursPage.backToHome}
           </Link>
-
           <div className="mb-8">
-            <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-2">{t.toursPage.exploreTitle}</h1>
-            <p className="text-muted-foreground">{filtered.length} {t.toursPage.toursFound}</p>
+            <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-2">
+              {t.toursPage.exploreTitle}
+            </h1>
+            <p className="text-muted-foreground">
+              {isLoading ? 'Loading...' : `${filtered.length} ${t.toursPage.toursFound}`}
+            </p>
           </div>
-
-          {/* Category Tabs */}
           <div className="flex flex-wrap gap-2 mb-8">
             {CATEGORY_TABS.map(tab => {
               const Icon = tab.icon;
               const isActive = activeCategory === tab.key;
               return (
-                <button
-                  key={tab.key}
-                  onClick={() => setActiveCategory(tab.key)}
-                  className={`group flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium border-2 transition-all duration-300 ${
-                    isActive
-                      ? 'bg-primary text-primary-foreground border-primary shadow-md'
-                      : 'border-border text-muted-foreground hover:border-primary/50 hover:text-foreground hover:bg-muted/50'
-                  }`}
-                >
-                  <Icon className={`w-4 h-4 transition-transform duration-200 group-hover:scale-110 ${isActive ? 'text-primary-foreground' : ''}`} />
+                <button key={tab.key} onClick={() => setActiveCategory(tab.key)}
+                  className={`group flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium border-2 transition-all duration-300 ${isActive ? 'bg-primary text-primary-foreground border-primary shadow-md' : 'border-border text-muted-foreground hover:border-primary/50 hover:text-foreground hover:bg-muted/50'}`}>
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-primary-foreground' : ''}`} />
                   {tab.label}
                 </button>
               );
             })}
           </div>
-
-          {/* Filters toggle */}
           <div className="flex items-center justify-between mb-4">
             <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowFilters(!showFilters)}>
               <SlidersHorizontal className="w-4 h-4" />
@@ -162,21 +156,8 @@ const ToursPage = () => {
               </button>
             )}
           </div>
-
           {showFilters && (
             <div className="bg-card border border-border rounded-xl p-6 mb-8 space-y-4">
-              <div>
-                <p className="text-sm text-muted-foreground mb-2">{t.toursPage.filters.activityType}</p>
-                <div className="flex flex-wrap gap-2">
-                  {ACTIVITY_TYPES.map(a => (
-                    <button key={a.key} onClick={() => setSelectedType(selectedType === a.key ? '' : a.key)}
-                      className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${selectedType === a.key ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-foreground hover:border-primary/50'}`}>
-                      {a.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               <div>
                 <p className="text-sm text-muted-foreground mb-2">{t.toursPage.filters.region}</p>
                 <div className="flex flex-wrap gap-2">
@@ -188,7 +169,6 @@ const ToursPage = () => {
                   ))}
                 </div>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground mb-2">{t.toursPage.filters.duration}</p>
@@ -215,7 +195,6 @@ const ToursPage = () => {
               </div>
             </div>
           )}
-
           {filtered.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filtered.map(tour => (
@@ -236,7 +215,9 @@ const ToursPage = () => {
           ) : (
             <div className="text-center py-16">
               <p className="text-lg text-muted-foreground mb-4">{t.toursPage.noResults}</p>
-              <Button onClick={() => { setActiveCategory('all'); clearFilters(); }}>{t.toursPage.clearAllFilters}</Button>
+              <Button onClick={() => { setActiveCategory('all'); clearFilters(); }}>
+                {t.toursPage.clearAllFilters}
+              </Button>
             </div>
           )}
         </div>
