@@ -51,7 +51,7 @@ const AdminTours = () => {
   };
 
   const filtered = tours.filter(t =>
-    t.title.toLowerCase().includes(search.toLowerCase())
+    (t.title_en || '').toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -99,7 +99,7 @@ const AdminTours = () => {
                       <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center text-gray-400 text-xs">No img</div>
                     )}
                   </TableCell>
-                  <TableCell className="font-medium max-w-[200px] truncate">{tour.title}</TableCell>
+                  <TableCell className="font-medium max-w-[200px] truncate">{tour.title_en}</TableCell>
                   <TableCell>
                     <Badge variant="secondary" className="text-xs">{tour.category}</Badge>
                   </TableCell>

@@ -20,7 +20,7 @@ const CATEGORIES = ['Tour Package', 'Day Excursion', 'Expedition', 'Horse Trek',
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
 const CURRENCIES = ['USD', 'EUR', 'KGS'];
 const LANGS = [
-  { key: 'en', label: 'English', titleField: 'title', descField: 'description' },
+  { key: 'en', label: 'English', titleField: 'title_en', descField: 'description_en' },
   { key: 'ru', label: 'Russian', titleField: 'title_ru', descField: 'description_ru' },
   { key: 'es', label: 'Spanish', titleField: 'title_es', descField: 'description_es' },
   { key: 'ar', label: 'Arabic', titleField: 'title_ar', descField: 'description_ar' },
@@ -34,23 +34,24 @@ const TourFormModal = ({ tour, onClose, onSaved }: TourFormModalProps) => {
   const [uploadingGallery, setUploadingGallery] = useState(false);
 
   const [form, setForm] = useState({
-    title: tour?.title || '',
+    title_en: tour?.title_en || tour?.title || '',
     title_ru: tour?.title_ru || '',
     title_es: tour?.title_es || '',
     title_ar: tour?.title_ar || '',
-    description: tour?.description || '',
+    description_en: tour?.description_en || tour?.description || '',
     description_ru: tour?.description_ru || '',
     description_es: tour?.description_es || '',
     description_ar: tour?.description_ar || '',
     price: tour?.price || 0,
     currency: tour?.currency || 'USD',
     duration: tour?.duration || '',
+    duration_days: tour?.duration_days || '',
     max_people: tour?.max_people || 20,
     difficulty: tour?.difficulty || 'Easy',
     category: tour?.category || 'Tour Package',
     is_active: tour?.is_active ?? true,
     is_featured: tour?.is_featured ?? false,
-    image_url: tour?.image_url || '',
+    cover_image: tour?.cover_image || tour?.image_url || '',
     gallery_images: tour?.gallery_images || [],
     start_date: tour?.start_date || '',
     end_date: tour?.end_date || '',
@@ -80,7 +81,7 @@ const TourFormModal = ({ tour, onClose, onSaved }: TourFormModalProps) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const url = await uploadImage(file);
-    if (url) set('image_url', url);
+    if (url) set('cover_image', url);
   };
 
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,34 +101,43 @@ const TourFormModal = ({ tour, onClose, onSaved }: TourFormModalProps) => {
   };
 
   const handleSave = async () => {
-    if (!form.title.trim()) {
+    if (!form.title_en.trim()) {
       toast({ title: 'English title is required', variant: 'destructive' });
       return;
     }
     setSaving(true);
+
+    // Generate slug from English title
+    const slug = form.title_en
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+
     const payload = {
-      title: form.title,
-      title_ru: form.title_ru,
-      title_es: form.title_es,
-      title_ar: form.title_ar,
-      description: form.description,
-      description_ru: form.description_ru,
-      description_es: form.description_es,
-      description_ar: form.description_ar,
+      title_en: form.title_en,
+      title_ru: form.title_ru || null,
+      title_es: form.title_es || null,
+      title_ar: form.title_ar || null,
+      description_en: form.description_en || null,
+      description_ru: form.description_ru || null,
+      description_es: form.description_es || null,
+      description_ar: form.description_ar || null,
       price: Number(form.price),
       currency: form.currency,
-      duration: form.duration,
+      duration: form.duration || null,
+      duration_days: form.duration_days ? Number(form.duration_days) : null,
       max_people: Number(form.max_people),
       difficulty: form.difficulty,
       category: form.category,
       is_active: form.is_active,
       is_featured: form.is_featured,
-      image_url: form.image_url || null,
+      cover_image: form.cover_image || null,
       gallery_images: form.gallery_images,
       start_date: form.start_date || null,
       end_date: form.end_date || null,
       status: form.status,
       current_bookings: Number(form.current_bookings),
+      slug: isEdit ? undefined : slug,
     };
 
     const { error } = isEdit
@@ -163,7 +173,7 @@ const TourFormModal = ({ tour, onClose, onSaved }: TourFormModalProps) => {
             {LANGS.map(l => (
               <TabsContent key={l.key} value={l.key} className="space-y-3">
                 <div>
-                  <Label>Title ({l.label}) {l.key === 'en' && '*'}</Label>
+                  <Label>Title ({l.label}) {l.key === 'en' && <span className="text-red-500">*</span>}</Label>
                   <Input
                     value={(form as any)[l.titleField]}
                     onChange={e => set(l.titleField, e.target.value)}
@@ -201,8 +211,8 @@ const TourFormModal = ({ tour, onClose, onSaved }: TourFormModalProps) => {
               </Select>
             </div>
             <div>
-              <Label>Duration</Label>
-              <Input value={form.duration} onChange={e => set('duration', e.target.value)} placeholder="e.g. 5 days" />
+              <Label>Duration (days)</Label>
+              <Input type="number" value={form.duration_days} onChange={e => set('duration_days', e.target.value)} placeholder="e.g. 5" />
             </div>
             <div>
               <Label>Max People</Label>
@@ -263,11 +273,11 @@ const TourFormModal = ({ tour, onClose, onSaved }: TourFormModalProps) => {
           <div>
             <Label>Cover Image</Label>
             <div className="mt-1 flex items-center gap-4">
-              {form.image_url ? (
+              {form.cover_image ? (
                 <div className="relative">
-                  <img src={form.image_url} alt="" className="w-24 h-24 rounded-lg object-cover" />
+                  <img src={form.cover_image} alt="" className="w-24 h-24 rounded-lg object-cover" />
                   <button
-                    onClick={() => set('image_url', '')}
+                    onClick={() => set('cover_image', '')}
                     className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"
                   >
                     <X className="w-3 h-3" />
