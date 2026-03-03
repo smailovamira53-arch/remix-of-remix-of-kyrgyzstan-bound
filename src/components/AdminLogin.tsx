@@ -14,6 +14,7 @@ export const AdminLogin = ({ onLogin }: AdminLoginProps) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [settingUp, setSettingUp] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,9 +38,28 @@ export const AdminLogin = ({ onLogin }: AdminLoginProps) => {
     }
   };
 
+  const handleSetupAdmin = async () => {
+    setSettingUp(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('setup-admin');
+      if (error) throw error;
+      if (data?.success) {
+        toast({ title: 'Admin created!', description: 'Email: admin@mountainmagic.com / Password: Admin123!' });
+        setEmail('admin@mountainmagic.com');
+        setPassword('Admin123!');
+      } else {
+        throw new Error(data?.error || 'Unknown error');
+      }
+    } catch (err: any) {
+      toast({ title: 'Setup failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setSettingUp(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="w-full max-w-sm bg-card border border-border rounded-xl p-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="w-full max-w-sm bg-white border border-gray-200 rounded-xl p-8">
         <h1 className="font-display text-2xl font-bold text-center mb-6">Admin Login</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -57,6 +77,19 @@ export const AdminLogin = ({ onLogin }: AdminLoginProps) => {
         <button onClick={() => setIsSignUp(!isSignUp)} className="w-full text-center text-sm text-muted-foreground mt-4 hover:underline">
           {isSignUp ? 'Already have an account? Sign in' : 'Need an account? Sign up'}
         </button>
+
+        {/* Temporary setup button - REMOVE AFTER FIRST USE */}
+        <div className="mt-6 pt-4 border-t border-gray-200">
+          <Button
+            variant="outline"
+            className="w-full text-sm border-amber-300 text-amber-700 hover:bg-amber-50"
+            onClick={handleSetupAdmin}
+            disabled={settingUp}
+          >
+            {settingUp ? 'Setting up...' : '⚡ Setup Admin (admin@mountainmagic.com)'}
+          </Button>
+          <p className="text-xs text-gray-400 text-center mt-2">Temporary — remove after first use</p>
+        </div>
       </div>
     </div>
   );
