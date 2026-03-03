@@ -13,11 +13,15 @@ import SearchResultsPage from "./pages/SearchResultsPage";
 import AboutKyrgyzstanPage from "./pages/AboutKyrgyzstanPage";
 import ContactPage from "./pages/ContactPage";
 import ToursPage from "./pages/ToursPage";
-import AdminPage from "./pages/AdminPage";
 import NomadGamesPage from "./pages/NomadGamesPage";
 import ExpeditionsPage from "./pages/ExpeditionsPage";
 import AccommodationsPage from "./pages/AccommodationsPage";
 import AccommodationDetailPage from "./pages/AccommodationDetailPage";
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminTours from "./pages/admin/AdminTours";
+import AdminBookings from "./pages/admin/AdminBookings";
+import AdminSettings from "./pages/admin/AdminSettings";
 
 const queryClient = new QueryClient();
 
@@ -27,23 +31,31 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <NomadGamesBanner />
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/guides" element={<GuidesPage />} />
-          <Route path="/tours" element={<ToursPage />} />
-          <Route path="/travel-tips" element={<TravelTipsPage />} />
-          <Route path="/tours/world-nomad-games-2026" element={<NomadGamesPage />} />
-          <Route path="/tours/:slug" element={<TourDetailPage />} />
-          <Route path="/search" element={<SearchResultsPage />} />
-          <Route path="/about" element={<AboutKyrgyzstanPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/expeditions" element={<ExpeditionsPage />} />
-          <Route path="/expeditions/:slug" element={<ExpeditionsPage />} />
-          <Route path="/accommodations" element={<AccommodationsPage />} />
-          <Route path="/accommodations/:slug" element={<AccommodationDetailPage />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          {/* Public routes with banner */}
+          <Route path="/" element={<><NomadGamesBanner /><Index /></>} />
+          <Route path="/guides" element={<><NomadGamesBanner /><GuidesPage /></>} />
+          <Route path="/tours" element={<><NomadGamesBanner /><ToursPage /></>} />
+          <Route path="/travel-tips" element={<><NomadGamesBanner /><TravelTipsPage /></>} />
+          <Route path="/tours/world-nomad-games-2026" element={<><NomadGamesBanner /><NomadGamesPage /></>} />
+          <Route path="/tours/:slug" element={<><NomadGamesBanner /><TourDetailPage /></>} />
+          <Route path="/search" element={<><NomadGamesBanner /><SearchResultsPage /></>} />
+          <Route path="/about" element={<><NomadGamesBanner /><AboutKyrgyzstanPage /></>} />
+          <Route path="/contact" element={<><NomadGamesBanner /><ContactPage /></>} />
+          <Route path="/expeditions" element={<><NomadGamesBanner /><ExpeditionsPage /></>} />
+          <Route path="/expeditions/:slug" element={<><NomadGamesBanner /><ExpeditionsPage /></>} />
+          <Route path="/accommodations" element={<><NomadGamesBanner /><AccommodationsPage /></>} />
+          <Route path="/accommodations/:slug" element={<><NomadGamesBanner /><AccommodationDetailPage /></>} />
+
+          {/* Admin routes - no banner */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={null} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="tours" element={<AdminTours />} />
+            <Route path="bookings" element={<AdminBookings />} />
+            <Route path="settings" element={<AdminSettings />} />
+          </Route>
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

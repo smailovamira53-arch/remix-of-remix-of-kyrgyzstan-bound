@@ -16,45 +16,84 @@ export type Database = {
     Tables: {
       tours: {
         Row: {
+          category: string
           created_at: string
+          currency: string
           current_bookings: number
           description: string
+          description_ar: string
+          description_es: string
+          description_ru: string
+          difficulty: string
           duration: string
           end_date: string | null
+          gallery_images: string[]
           id: string
           image_url: string | null
+          is_active: boolean
+          is_featured: boolean
+          max_people: number
           price: number
           start_date: string | null
           status: string
           title: string
+          title_ar: string
+          title_es: string
+          title_ru: string
           updated_at: string
         }
         Insert: {
+          category?: string
           created_at?: string
+          currency?: string
           current_bookings?: number
           description?: string
+          description_ar?: string
+          description_es?: string
+          description_ru?: string
+          difficulty?: string
           duration?: string
           end_date?: string | null
+          gallery_images?: string[]
           id?: string
           image_url?: string | null
+          is_active?: boolean
+          is_featured?: boolean
+          max_people?: number
           price?: number
           start_date?: string | null
           status?: string
           title: string
+          title_ar?: string
+          title_es?: string
+          title_ru?: string
           updated_at?: string
         }
         Update: {
+          category?: string
           created_at?: string
+          currency?: string
           current_bookings?: number
           description?: string
+          description_ar?: string
+          description_es?: string
+          description_ru?: string
+          difficulty?: string
           duration?: string
           end_date?: string | null
+          gallery_images?: string[]
           id?: string
           image_url?: string | null
+          is_active?: boolean
+          is_featured?: boolean
+          max_people?: number
           price?: number
           start_date?: string | null
           status?: string
           title?: string
+          title_ar?: string
+          title_es?: string
+          title_ru?: string
           updated_at?: string
         }
         Relationships: []
