@@ -26,10 +26,17 @@ const WhatsAppIcon = () => (
   </svg>
 );
 
+function getBishkekHour(): number {
+  const formatter = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Bishkek',
+    hour: 'numeric',
+    hour12: false,
+  });
+  return parseInt(formatter.format(new Date()), 10);
+}
+
 function isBishkekOnline(): boolean {
-  const now = new Date();
-  const bishkekTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Bishkek' }));
-  const hour = bishkekTime.getHours();
+  const hour = getBishkekHour();
   return hour >= 5 && hour < 23;
 }
 
@@ -48,7 +55,7 @@ export default function WhatsAppWidget() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+    <div className="fixed bottom-24 right-6 z-50 flex flex-col items-end gap-3">
       <AnimatePresence>
         {open && online && (
           <motion.div
@@ -95,7 +102,7 @@ export default function WhatsAppWidget() {
 
       {/* Offline tooltip */}
       {!online && (
-        <div className="bg-white rounded-full px-3 py-1.5 shadow-lg text-xs text-gray-500 whitespace-nowrap">
+        <div className="bg-white rounded-full px-3 py-1.5 shadow-md text-xs text-gray-600 whitespace-nowrap">
           Мы offline · Работаем с 05:00 до 23:00
         </div>
       )}
@@ -104,7 +111,7 @@ export default function WhatsAppWidget() {
       <button
         onClick={() => online && setOpen((v) => !v)}
         className={`relative w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-colors ${
-          online ? 'bg-[#25D366] hover:bg-[#20bd5a] cursor-pointer' : 'bg-gray-400 cursor-not-allowed pointer-events-none'
+          online ? 'bg-[#25D366] hover:bg-[#20bd5a] cursor-pointer' : 'bg-gray-500 opacity-80 cursor-not-allowed pointer-events-none'
         }`}
       >
         <WhatsAppIcon />
