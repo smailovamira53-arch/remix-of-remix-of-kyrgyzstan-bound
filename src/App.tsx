@@ -22,6 +22,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminTours from "./pages/admin/AdminTours";
 import AdminBookings from "./pages/admin/AdminBookings";
 import AdminSettings from "./pages/admin/AdminSettings";
+import WhatsAppWidget from "./components/WhatsAppWidget";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <WhatsAppWidget />
         <Routes>
           {/* Public routes with banner */}
           <Route path="/" element={<><NomadGamesBanner /><Index /></>} />
