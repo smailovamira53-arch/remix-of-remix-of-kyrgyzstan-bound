@@ -113,36 +113,34 @@ const TourFormModal = ({ tour, onClose, onSaved }: TourFormModalProps) => {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
 
-    const payload = {
-      title_en: form.title_en,
-      title_ru: form.title_ru || null,
-      title_es: form.title_es || null,
-      title_ar: form.title_ar || null,
-      description_en: form.description_en || null,
-      description_ru: form.description_ru || null,
-      description_es: form.description_es || null,
-      description_ar: form.description_ar || null,
+    const payload: Record<string, unknown> = {
+      title: form.title_en,
+      title_ru: form.title_ru || '',
+      title_es: form.title_es || '',
+      title_ar: form.title_ar || '',
+      description: form.description_en || '',
+      description_ru: form.description_ru || '',
+      description_es: form.description_es || '',
+      description_ar: form.description_ar || '',
       price: Number(form.price),
       currency: form.currency,
-      duration: form.duration || null,
-      duration_days: form.duration_days ? Number(form.duration_days) : null,
+      duration: form.duration || '',
       max_people: Number(form.max_people),
       difficulty: form.difficulty,
       category: form.category,
       is_active: form.is_active,
       is_featured: form.is_featured,
-      cover_image: form.cover_image || null,
+      image_url: form.cover_image || null,
       gallery_images: form.gallery_images,
       start_date: form.start_date || null,
       end_date: form.end_date || null,
       status: form.status,
       current_bookings: Number(form.current_bookings),
-      slug: isEdit ? undefined : slug,
     };
 
     const { error } = isEdit
-      ? await supabase.from('tours').update(payload).eq('id', tour.id)
-      : await supabase.from('tours').insert(payload);
+      ? await supabase.from('tours').update(payload as any).eq('id', tour.id)
+      : await supabase.from('tours').insert(payload as any);
 
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });

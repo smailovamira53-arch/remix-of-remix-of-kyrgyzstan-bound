@@ -47,8 +47,9 @@ export const useTourBySlug = (slug: string) => {
       const { data, error } = await supabase
         .from('tours')
         .select('*')
-        .eq('slug', slug)
-        .maybeSingle();
+        .eq('title', slug)
+        .limit(1)
+        .single() as { data: any; error: any };
       if (error) throw error;
       return data as unknown as Tour;
     },
