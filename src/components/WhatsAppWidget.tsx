@@ -1,74 +1,76 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
+import { useLanguage } from '@/i18n/LanguageContext';
+
+const widgetTranslations = {
+  en: {
+    title: 'Mountain Magic Tours',
+    subtitle: 'Choose a manager',
+    footer: 'We usually reply within 15 minutes',
+    message: 'Hello, I would like to know more about the tour...',
+  },
+  ru: {
+    title: 'Mountain Magic Tours',
+    subtitle: 'Выберите менеджера',
+    footer: 'Обычно отвечаем в течение 15 минут',
+    message: 'Здравствуйте, я хочу узнать подробнее о туре...',
+  },
+  es: {
+    title: 'Mountain Magic Tours',
+    subtitle: 'Elige un manager',
+    footer: 'Solemos responder en 15 minutos',
+    message: 'Hola, me gustaría saber más sobre el tour...',
+  },
+  ar: {
+    title: 'Mountain Magic Tours',
+    subtitle: 'اختر مديراً',
+    footer: 'نرد عادةً خلال 15 دقيقة',
+    message: 'مرحباً، أريد معرفة المزيد عن الجولة...',
+  },
+};
 
 const managers = [
-  {
-    name: 'Улукбек',
-    langs: 'En / Ru',
-    phone: '996707509509',
-    avatar: '/team/ulukbek.jpg',
-    isImage: true,
-  },
-  {
-    name: 'Руслан',
-    langs: 'En / Ru',
-    phone: '996703404054',
-    avatar: '👨‍💼',
-    isImage: false,
-  },
+  { name: 'Улукбек', languages: 'En/Ru', phone: '996707509509', avatar: 'image' },
+  { name: 'Руслан', languages: 'En/Ru', phone: '996703404054', avatar: 'emoji' },
 ];
 
-const WA_MESSAGE = encodeURIComponent('Здравствуйте, я хочу узнать подробнее о туре...');
-
 const WhatsAppIcon = () => (
-  <svg viewBox="0 0 32 32" className="w-7 h-7 fill-white">
-    <path d="M16.004 0h-.008C7.174 0 0 7.176 0 16.004c0 3.5 1.132 6.744 3.058 9.376L1.058 31.14l5.962-1.966A15.9 15.9 0 0016.004 32C24.826 32 32 24.826 32 16.004 32 7.176 24.826 0 16.004 0zm9.294 22.612c-.39 1.098-1.932 2.01-3.148 2.276-.834.178-1.922.32-5.59-1.202-4.694-1.944-7.706-6.716-7.94-7.026-.226-.31-1.896-2.528-1.896-4.822s1.2-3.42 1.626-3.888c.426-.47.93-.586 1.24-.586.31 0 .62.002.89.016.286.014.67-.108.95.724.31.87 1.052 2.962 1.144 3.176.092.214.154.464.03.748-.122.286-.184.464-.368.714-.184.25-.388.558-.554.748-.184.214-.376.446-.162.874.214.428.952 1.572 2.044 2.546 1.404 1.252 2.588 1.64 2.954 1.822.368.184.582.154.796-.092.214-.248.918-1.068 1.162-1.436.244-.368.488-.306.824-.184.336.122 2.132 1.006 2.498 1.19.366.184.61.276.702.428.092.154.092.872-.298 1.97z" />
+  <svg viewBox="0 0 24 24" width="28" height="28" fill="white">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
   </svg>
 );
 
-function getBishkekHour(): number {
-  const formatter = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Asia/Bishkek',
-    hour: 'numeric',
-    hour12: false,
-  });
-  return parseInt(formatter.format(new Date()), 10);
-}
-
-function isBishkekOnline(): boolean {
-  const hour = getBishkekHour();
-  return hour >= 5 && hour < 23;
-}
-
 export default function WhatsAppWidget() {
-  const [open, setOpen] = useState(false);
-  const [online, setOnline] = useState(isBishkekOnline);
-
-  useEffect(() => {
-    const interval = setInterval(() => setOnline(isBishkekOnline()), 60_000);
-    return () => clearInterval(interval);
-  }, []);
+  const [isOpen, setIsOpen] = useState(false);
+  const { language } = useLanguage();
+  const t = widgetTranslations[language];
 
   const handleManagerClick = (phone: string) => {
-    window.open(`https://wa.me/${phone}?text=${WA_MESSAGE}`, '_blank');
-    setOpen(false);
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(t.message)}`, '_blank');
+    setIsOpen(false);
   };
 
   return (
     <div className="fixed bottom-24 right-6 z-50 flex flex-col items-end gap-3">
       <AnimatePresence>
-        {open && online && (
+        {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="w-72 rounded-2xl shadow-2xl overflow-hidden bg-white mb-2"
+            className="w-72 rounded-2xl shadow-2xl bg-white overflow-hidden"
           >
             {/* Header */}
-            <div className="bg-[#25D366] px-4 py-3 text-white">
-              <p className="font-bold text-sm">Mountain Magic Tours</p>
-              <p className="text-xs opacity-90">Выберите менеджера</p>
+            <div className="px-4 py-3 flex items-center justify-between" style={{ backgroundColor: '#25D366' }}>
+              <div>
+                <p className="text-white font-semibold text-sm">{t.title}</p>
+                <p className="text-white/80 text-xs">{t.subtitle}</p>
+              </div>
+              <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white transition-colors">
+                <X size={18} />
+              </button>
             </div>
 
             {/* Managers */}
@@ -77,50 +79,48 @@ export default function WhatsAppWidget() {
                 <button
                   key={m.phone}
                   onClick={() => handleManagerClick(m.phone)}
-                  className="flex items-center gap-3 w-full rounded-xl p-2.5 hover:bg-gray-50 transition-colors text-left"
+                  className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 transition-colors text-left"
                 >
-                  {m.isImage ? (
-                    <img src={m.avatar} alt={m.name} className="w-10 h-10 rounded-full object-cover" />
+                  {m.avatar === 'image' ? (
+                    <img src="/team/ulukbek.jpg" className="w-10 h-10 rounded-full object-cover" alt={m.name} />
                   ) : (
-                    <span className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-xl">{m.avatar}</span>
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg" style={{ backgroundColor: '#25D366' }}>
+                      👨‍💼
+                    </div>
                   )}
                   <div>
-                    <p className="font-semibold text-sm text-gray-900">{m.name}</p>
-                    <p className="text-xs text-gray-500">{m.langs}</p>
+                    <p className="font-medium text-sm text-gray-900">{m.name}</p>
+                    <p className="text-xs text-gray-500">{m.languages}</p>
                   </div>
                 </button>
               ))}
             </div>
 
             {/* Footer */}
-            <div className="px-4 pb-3">
-              <p className="text-xs text-[#25D366] text-center">Обычно отвечаем в течение 15 минут</p>
+            <div className="px-4 py-2.5 border-t border-gray-100">
+              <p className="text-xs text-center" style={{ color: '#25D366' }}>{t.footer}</p>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Offline tooltip */}
-      {!online && (
-        <div className="bg-white rounded-full px-3 py-1.5 shadow-md text-xs text-gray-600 whitespace-nowrap">
-          Мы offline · Работаем с 05:00 до 23:00
-        </div>
-      )}
-
       {/* FAB */}
       <button
-        onClick={() => online && setOpen((v) => !v)}
-        className={`relative w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-colors ${
-          online ? 'bg-[#25D366] hover:bg-[#20bd5a] cursor-pointer' : 'bg-gray-500 opacity-80 cursor-not-allowed pointer-events-none'
-        }`}
+        onClick={() => setIsOpen((o) => !o)}
+        className="relative w-14 h-14 rounded-full shadow-lg flex items-center justify-center cursor-pointer hover:scale-105 transition-transform"
+        style={{ backgroundColor: '#25D366' }}
       >
-        <WhatsAppIcon />
-        {/* Status dot */}
-        <span
-          className={`absolute top-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white ${
-            online ? 'bg-green-400 animate-pulse' : 'bg-gray-400'
-          }`}
-        />
+        {/* Pulsing dot */}
+        <span className="absolute top-0 right-0 w-3.5 h-3.5 rounded-full border-2 border-white" style={{ backgroundColor: '#22c55e' }}>
+          <span className="absolute inset-0 rounded-full animate-ping" style={{ backgroundColor: '#22c55e', opacity: 0.6 }} />
+        </span>
+
+        <motion.div
+          animate={{ rotate: isOpen ? 90 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          {isOpen ? <X size={28} color="white" /> : <WhatsAppIcon />}
+        </motion.div>
       </button>
     </div>
   );
