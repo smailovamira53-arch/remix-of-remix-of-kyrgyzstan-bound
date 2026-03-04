@@ -102,7 +102,7 @@ export default function WhatsAppWidget() {
 
       {/* Offline tooltip */}
       {!online && (
-        <div className="bg-white rounded-full px-3 py-1.5 shadow-lg text-xs text-gray-500 whitespace-nowrap">
+        <div className="bg-white rounded-full px-3 py-1.5 shadow-md text-xs text-gray-600 whitespace-nowrap">
           Мы offline · Работаем с 05:00 до 23:00
         </div>
       )}
