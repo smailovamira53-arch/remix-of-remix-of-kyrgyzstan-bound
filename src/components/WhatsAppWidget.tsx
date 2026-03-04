@@ -26,10 +26,17 @@ const WhatsAppIcon = () => (
   </svg>
 );
 
+function getBishkekHour(): number {
+  const formatter = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Bishkek',
+    hour: 'numeric',
+    hour12: false,
+  });
+  return parseInt(formatter.format(new Date()), 10);
+}
+
 function isBishkekOnline(): boolean {
-  const now = new Date();
-  const bishkekTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Bishkek' }));
-  const hour = bishkekTime.getHours();
+  const hour = getBishkekHour();
   return hour >= 5 && hour < 23;
 }
 
