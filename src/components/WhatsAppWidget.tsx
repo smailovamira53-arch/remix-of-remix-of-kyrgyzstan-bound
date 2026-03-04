@@ -111,7 +111,7 @@ export default function WhatsAppWidget() {
       <button
         onClick={() => online && setOpen((v) => !v)}
         className={`relative w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-colors ${
-          online ? 'bg-[#25D366] hover:bg-[#20bd5a] cursor-pointer' : 'bg-gray-400 cursor-not-allowed pointer-events-none'
+          online ? 'bg-[#25D366] hover:bg-[#20bd5a] cursor-pointer' : 'bg-gray-500 opacity-80 cursor-not-allowed pointer-events-none'
         }`}
       >
         <WhatsAppIcon />
