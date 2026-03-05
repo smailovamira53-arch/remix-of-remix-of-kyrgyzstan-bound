@@ -1,299 +1,434 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, Send, ArrowLeft } from 'lucide-react';
 import { useLanguage } from '@/i18n/LanguageContext';
 
+// ─── Переводы ────────────────────────────────────────────────────────────────
 const widgetTranslations = {
   en: {
     title: 'Mountain Magic Tours',
     subtitle: 'Choose a manager',
-    footer: 'We usually reply within 15 minutes',
-    message: 'Hello, I would like to know more about the tour...',
-    workingHours: 'Working hours: 05:00 – 23:00 (Bishkek)',
-    offline: "We're offline · Back at 05:00",
-    phrases: [
+    workingHours: 'Working hours: 05:00–23:00 (Bishkek time)',
+    offlineNote: "We're offline · Back at 05:00",
+    offlineBadge: 'Offline',
+    placeholder: 'Write your message...',
+    defaultMessage: 'Hello! I would like to know more about your tours.',
+    chatGreeting: 'Hello! How can I help you? 😊',
+    rotating: [
       'I know the perfect tour for you 🏔️',
-      'Save time — write to us now',
+      'Save time — write to us now ✍️',
       "Let's plan your Kyrgyzstan adventure!",
     ],
   },
   ru: {
     title: 'Mountain Magic Tours',
     subtitle: 'Выберите менеджера',
-    footer: 'Обычно отвечаем в течение 15 минут',
-    message: 'Здравствуйте, я хочу узнать подробнее о туре...',
-    workingHours: 'Время работы: 05:00 – 23:00 (Бишкек)',
-    offline: 'Мы offline · Работаем с 05:00',
-    phrases: [
-      'Знаю идеальный тур для вас 🏔️',
-      'Экономьте время — напишите нам',
-      'Спланируем ваше приключение!',
+    workingHours: 'Рабочее время: 05:00–23:00 (по Бишкеку)',
+    offlineNote: 'Офлайн · Вернёмся в 05:00',
+    offlineBadge: 'Офлайн',
+    placeholder: 'Напишите ваше сообщение...',
+    defaultMessage: 'Здравствуйте! Хочу узнать подробнее о ваших турах.',
+    chatGreeting: 'Здравствуйте! Чем могу помочь? 😊',
+    rotating: [
+      'Я знаю, какой тур вы ищете 🏔️',
+      'Сэкономьте время — напишите нам ✍️',
+      'Планируем ваше приключение в Кыргызстане!',
     ],
   },
   es: {
     title: 'Mountain Magic Tours',
     subtitle: 'Elige un manager',
-    footer: 'Solemos responder en 15 minutos',
-    message: 'Hola, me gustaría saber más sobre el tour...',
-    workingHours: 'Horario: 05:00 – 23:00 (Bishkek)',
-    offline: 'Estamos offline · Volvemos a las 05:00',
-    phrases: [
-      'Conozco el tour perfecto para ti 🏔️',
-      'Ahorra tiempo — escríbenos ahora',
-      '¡Planifiquemos tu aventura!',
+    workingHours: 'Horario: 05:00–23:00 (hora de Biskek)',
+    offlineNote: 'Offline · Volvemos a las 05:00',
+    offlineBadge: 'Offline',
+    placeholder: 'Escribe tu mensaje...',
+    defaultMessage: 'Hola! Me gustaría saber más sobre sus tours.',
+    chatGreeting: '¡Hola! ¿En qué puedo ayudarte? 😊',
+    rotating: [
+      'Sé el tour perfecto para ti 🏔️',
+      'Ahorra tiempo — escríbenos ahora ✍️',
+      '¡Planifiquemos tu aventura en Kirguistán!',
     ],
   },
   ar: {
     title: 'Mountain Magic Tours',
     subtitle: 'اختر مديراً',
-    footer: 'نرد عادةً خلال 15 دقيقة',
-    message: 'مرحباً، أريد معرفة المزيد عن الجولة...',
-    workingHours: 'ساعات العمل: 05:00 – 23:00 (بيشكك)',
-    offline: 'نحن غير متصلين · نعود الساعة 05:00',
-    phrases: [
+    workingHours: 'ساعات العمل: 05:00–23:00 (توقيت بيشكيك)',
+    offlineNote: 'غير متصل · نعود في 05:00',
+    offlineBadge: 'غير متصل',
+    placeholder: 'اكتب رسالتك...',
+    defaultMessage: 'مرحباً! أريد معرفة المزيد عن جولاتكم.',
+    chatGreeting: 'مرحباً! كيف يمكنني مساعدتك؟ 😊',
+    rotating: [
       'أعرف الجولة المثالية لك 🏔️',
-      'وفّر وقتك — اكتب لنا الآن',
-      'لنخطط لمغامرتك!',
+      'وفّر وقتك — راسلنا الآن ✍️',
+      'لنخطط لمغامرتك في قيرغيزستان!',
     ],
   },
 };
 
+// ─── Менеджеры — одинаковые часы для обоих ───────────────────────────────────
 const managers = [
   {
     name: 'Улукбек',
-    role: 'Tour Manager',
-    langs: 'En / Ru',
+    role: 'En / Ru',
     phone: '996707509509',
     photo: '/team/ulukbek.jpg',
+    hours: '05:00–23:00',
   },
   {
     name: 'Руслан',
-    role: 'Tour Manager',
-    langs: 'En / Ru',
+    role: 'En / Ru',
     phone: '996703404054',
     photo: '/team/ruslan.jpeg',
+    hours: '05:00–23:00',
   },
 ];
 
-function getBishkekHour(): number {
-  const formatter = new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Asia/Bishkek',
-    hour: 'numeric',
-    hour12: false,
-  });
-  return parseInt(formatter.format(new Date()), 10);
-}
-
-function isOnlineNow(): boolean {
-  const h = getBishkekHour();
-  return h >= 5 && h < 23;
-}
-
-const WhatsAppIcon = ({ size = 28 }: { size?: number }) => (
-  <svg viewBox="0 0 24 24" width={size} height={size} fill="currentColor">
+// ─── SVG иконка WhatsApp ──────────────────────────────────────────────────────
+const WhatsAppIcon = ({ size = 24 }: { size?: number }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} fill="white">
     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
   </svg>
 );
 
+// ─── Онлайн с 05:00 до 23:00 по Бишкеку (UTC+6) ──────────────────────────────
+function isOnlineNow(): boolean {
+  const now = new Date();
+  const bishkekHour = (now.getUTCHours() + 6) % 24;
+  return bishkekHour >= 5 && bishkekHour < 23;
+}
+
+// ─── Компонент ────────────────────────────────────────────────────────────────
 export default function WhatsAppWidget() {
   const [isOpen, setIsOpen] = useState(false);
+  const [activeManager, setActiveManager] = useState<(typeof managers)[0] | null>(null);
+  const [message, setMessage] = useState('');
   const [phraseIndex, setPhraseIndex] = useState(0);
-  const [showBubble, setShowBubble] = useState(false);
-  const [online, setOnline] = useState(isOnlineNow);
-  const [activeManagerIndex, setActiveManagerIndex] = useState(0);
+  const [showPhrase, setShowPhrase] = useState(false);
   const { language } = useLanguage();
-  const tr = widgetTranslations[language] || widgetTranslations.en;
+  const online = isOnlineNow();
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Check online status every minute
-  useEffect(() => {
-    const interval = setInterval(() => setOnline(isOnlineNow()), 60_000);
-    return () => clearInterval(interval);
-  }, []);
+  const tr =
+    widgetTranslations[language as keyof typeof widgetTranslations] ||
+    widgetTranslations.en;
 
-  // Rotating phrases cycle — each phrase from a different manager
+  // ── Анимация всплывающих фраз ─────────────────────────────────────────────
+  // Первая — через 2 сек после загрузки, потом каждые 7 сек, видна 3.2 сек
   useEffect(() => {
-    if (isOpen) return;
+    if (isOpen) {
+      setShowPhrase(false);
+      return;
+    }
+
+    let idx = phraseIndex;
 
     const showNext = () => {
-      setShowBubble(true);
+      setShowPhrase(true);
       setTimeout(() => {
-        setShowBubble(false);
-        setTimeout(() => {
-          setPhraseIndex((i) => (i + 1) % tr.phrases.length);
-          setActiveManagerIndex((i) => (i + 1) % managers.length);
-        }, 400);
-      }, 3000);
+        setShowPhrase(false);
+        idx = (idx + 1) % tr.rotating.length;
+        setPhraseIndex(idx);
+      }, 4000);
     };
 
-    const initialTimeout = setTimeout(showNext, 2000);
-    const interval = setInterval(showNext, 6400);
+    const init = setTimeout(showNext, 10000);
+const loop = setInterval(showNext, 30000);
 
     return () => {
-      clearTimeout(initialTimeout);
-      clearInterval(interval);
+      clearTimeout(init);
+      clearInterval(loop);
     };
-  }, [isOpen, tr.phrases.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
-  const handleManagerClick = useCallback(
-    (phone: string) => {
-      window.open(
-        `https://wa.me/${phone}?text=${encodeURIComponent(tr.message)}`,
-        '_blank'
-      );
-      setIsOpen(false);
-    },
-    [tr.message]
-  );
+  // ── Заполняем поле при открытии чата конкретного менеджера ────────────────
+  useEffect(() => {
+    if (activeManager) {
+      setMessage(tr.defaultMessage);
+      setTimeout(() => inputRef.current?.focus(), 300);
+    }
+  }, [activeManager, tr.defaultMessage]);
 
   const handleFabClick = () => {
-    setIsOpen((o) => !o);
-    setShowBubble(false);
+    setIsOpen((prev) => !prev);
+    if (isOpen) setActiveManager(null);
   };
 
-  const currentPhrase = online ? tr.phrases[phraseIndex] : tr.offline;
-  const bubbleManager = managers[activeManagerIndex];
+  const handleSend = (phone: string) => {
+    const text = message.trim() || tr.defaultMessage;
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
+  };
 
   return (
-    <div className="fixed bottom-24 right-6 z-50 flex flex-col items-end gap-3">
-      {/* Popup */}
+    /*
+     * МОБИЛЬНОЕ ПОЗИЦИОНИРОВАНИЕ:
+     *   bottom-20 (80px) на мобиле — выше нижней панели браузера (адресная строка iOS/Android)
+     *   bottom-8  (32px) на sm+ экранах
+     *   right-4   (16px) мобил / right-6 (24px) десктоп
+     *   z-[9999]  — выше navbar, баннера и всего остального
+     *
+     * ВАЖНО: style fontSize=16px в <input> — без этого iOS делает zoom при фокусе
+     */
+    <div className="fixed bottom-20 right-4 sm:bottom-8 sm:right-6 z-[9999] flex flex-col items-end gap-2">
+
+      {/* ── Всплывающая фраза ── */}
       <AnimatePresence>
-        {isOpen && (
+        {showPhrase && !isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            key={phraseIndex}
+            initial={{ opacity: 0, x: 16, scale: 0.93 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 16, scale: 0.93 }}
+            transition={{ type: 'spring', stiffness: 320, damping: 26 }}
+            className="flex items-center gap-2 px-3 py-2 rounded-full shadow-lg text-white font-medium"
+            style={{
+              backgroundColor: '#1E3A5F',
+              fontSize: 13,
+              // Не вылазит за левый край экрана
+              maxWidth: 'min(240px, calc(100vw - 88px))',
+            }}
+          >
+            <WhatsAppIcon size={15} />
+            <span className="truncate">{tr.rotating[phraseIndex]}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Попап: список менеджеров ── */}
+      <AnimatePresence>
+        {isOpen && !activeManager && (
+          <motion.div
+            key="main-popup"
+            initial={{ opacity: 0, y: 12, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-            className="w-80 rounded-2xl shadow-2xl overflow-hidden bg-white border border-gray-100"
+            exit={{ opacity: 0, y: 12, scale: 0.96 }}
+            transition={{ duration: 0.2 }}
+            className="rounded-2xl shadow-2xl overflow-hidden bg-white"
+            // min(288px, 100vw - 32px) — на узких экранах займёт всю ширину минус отступы
+            style={{ width: 'min(288px, calc(100vw - 32px))' }}
           >
             {/* Header */}
             <div
-              className="px-5 py-4 flex items-center justify-between"
+              className="px-4 py-3 flex items-center justify-between"
               style={{ backgroundColor: '#1E3A5F' }}
             >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white">
-                  <WhatsAppIcon size={22} />
-                </div>
-                <div>
-                  <p className="font-bold text-sm text-white">{tr.title}</p>
-                  <p className="text-xs text-white/60">{tr.subtitle}</p>
-                </div>
+              <div>
+                <p className="font-semibold text-sm text-white">{tr.title}</p>
+                <p className="text-xs text-white/70">{tr.subtitle}</p>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                className="text-white/60 hover:text-white transition-colors p-1 -mr-1"
               >
-                <X size={14} className="text-white" />
+                <X size={18} />
               </button>
             </div>
 
-            {/* Managers */}
+            {/* Менеджеры */}
             <div className="p-3 space-y-1">
               {managers.map((m) => (
                 <button
                   key={m.phone}
-                  onClick={() => handleManagerClick(m.phone)}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors text-left group"
+                  onClick={() => setActiveManager(m)}
+                  // active:bg-gray-100 — тактильный фидбек на мобиле при нажатии
+                  className="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-gray-50 active:bg-gray-100 transition-colors text-left group"
                 >
+                  {/* Фото + точка статуса */}
                   <div className="relative flex-shrink-0">
                     <img
                       src={m.photo}
                       alt={m.name}
-                      className="w-11 h-11 rounded-full object-cover"
+                      className="w-11 h-11 rounded-full object-cover border-2"
+                      style={{ borderColor: '#AFC7D9' }}
                     />
                     <span
-                      className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
-                        online ? 'bg-green-500' : 'bg-gray-400'
-                      }`}
+                      className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white"
+                      style={{ backgroundColor: online ? '#22c55e' : '#9ca3af' }}
                     />
                   </div>
+                  {/* Имя, роль, часы */}
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm text-gray-900">
-                      {m.name}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {m.role} · {m.langs}
+                    <p className="font-semibold text-sm text-gray-900">{m.name}</p>
+                    <p className="text-xs text-gray-400">
+                      {m.role} · {m.hours}
                     </p>
                   </div>
-                  <div className="w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-white">
-                    <WhatsAppIcon size={16} />
-                  </div>
+                  {/* Стрелка */}
+                  <svg
+                    className="w-4 h-4 flex-shrink-0 text-gray-300 group-hover:text-gray-500 transition-colors"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
                 </button>
               ))}
             </div>
 
             {/* Footer */}
-            <div className="px-5 py-3 bg-gray-50 border-t border-gray-100">
-              <p className="text-[11px] text-gray-500 text-center">
-                {tr.workingHours}
-              </p>
-              <p className="text-[11px] text-gray-400 text-center mt-0.5">
-                {tr.footer}
-              </p>
+            <div
+              className="px-4 py-2.5 border-t border-gray-100"
+              style={{ backgroundColor: online ? undefined : '#fef3c7' }}
+            >
+              {online ? (
+                <p className="text-xs text-center text-gray-400">{tr.workingHours}</p>
+              ) : (
+                <p className="text-xs text-center font-medium" style={{ color: '#92400e' }}>
+                  {tr.offlineNote}
+                </p>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {/* ── Чат-окно менеджера ── */}
+        {isOpen && activeManager && (
+          <motion.div
+            key="chat-popup"
+            initial={{ opacity: 0, y: 12, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 12, scale: 0.96 }}
+            transition={{ duration: 0.2 }}
+            className="rounded-2xl shadow-2xl overflow-hidden bg-white flex flex-col"
+            style={{ width: 'min(288px, calc(100vw - 32px))' }}
+          >
+            {/* Header */}
+            <div
+              className="px-3 py-2.5 flex items-center gap-2"
+              style={{ backgroundColor: '#1E3A5F' }}
+            >
+              <button
+                onClick={() => setActiveManager(null)}
+                className="text-white/70 hover:text-white transition-colors flex-shrink-0 p-1 -ml-1"
+              >
+                <ArrowLeft size={18} />
+              </button>
+              <div className="relative flex-shrink-0">
+                <img
+                  src={activeManager.photo}
+                  alt={activeManager.name}
+                  className="w-9 h-9 rounded-full object-cover border-2 border-white/30"
+                />
+                <span
+                  className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-white"
+                  style={{ backgroundColor: online ? '#22c55e' : '#9ca3af' }}
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-semibold text-sm leading-tight">
+                  {activeManager.name}
+                </p>
+                <p className="text-white/60 text-xs truncate">
+                  {activeManager.hours} · {activeManager.role}
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setActiveManager(null);
+                  setIsOpen(false);
+                }}
+                className="text-white/60 hover:text-white transition-colors flex-shrink-0 p-1 -mr-1"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Пузырь приветствия */}
+            <div className="px-3 pt-5 pb-2">
+              <div
+                className="rounded-2xl rounded-tl-sm px-4 py-3 text-white text-sm leading-relaxed"
+                style={{ backgroundColor: '#1E3A5F' }}
+              >
+                {tr.chatGreeting}
+              </div>
+            </div>
+
+            {/* Поле ввода + кнопка отправить */}
+            <div className="px-3 pb-3 pt-2">
+              <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2 bg-gray-50 focus-within:border-blue-300 transition-colors">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && message.trim()) {
+                      handleSend(activeManager.phone);
+                    }
+                  }}
+                  placeholder={tr.placeholder}
+                  // fontSize: 16 — обязательно! без этого iOS зумится при фокусе на поле
+                  style={{ fontSize: 16 }}
+                  className="flex-1 bg-transparent outline-none text-gray-800 placeholder-gray-400 min-w-0"
+                />
+                <button
+                  onClick={() => handleSend(activeManager.phone)}
+                  disabled={!message.trim()}
+                  className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90"
+                  style={{
+                    backgroundColor: message.trim() ? '#1E3A5F' : '#e5e7eb',
+                  }}
+                >
+                  <Send
+                    size={15}
+                    color={message.trim() ? 'white' : '#9ca3af'}
+                    className="translate-x-0.5"
+                  />
+                </button>
+              </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Bubble + FAB row */}
-      <div className="flex items-center gap-2">
-        {/* Chat-style message bubble with manager avatar */}
-        <AnimatePresence>
-          {showBubble && !isOpen && (
-            <motion.div
-              initial={{ opacity: 0, x: 30, scale: 0.8 }}
-              animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 30, scale: 0.8 }}
-              transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-              className="flex items-end gap-2 cursor-pointer"
-              onClick={handleFabClick}
-            >
-              {/* Manager avatar */}
-              <div className="relative flex-shrink-0">
-                <img
-                  src={bubbleManager.photo}
-                  alt={bubbleManager.name}
-                  className="w-8 h-8 rounded-full object-cover shadow-md"
-                />
-                {online && (
-                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white bg-green-500" />
-                )}
-              </div>
-              {/* Message bubble */}
-              <div className="bg-white rounded-2xl rounded-bl-md shadow-lg px-4 py-2.5 max-w-[210px] border border-gray-100">
-                <p className="text-[11px] font-medium text-gray-700 leading-relaxed">
-                  {currentPhrase}
-                </p>
-                <p className="text-[9px] text-gray-400 mt-0.5">{bubbleManager.name}</p>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* FAB button — #1E3A5F */}
-        <button
-          onClick={handleFabClick}
-          className={`relative w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 text-white ${
-            online
-              ? 'hover:scale-110 hover:shadow-xl'
-              : 'opacity-70 hover:opacity-90 hover:scale-105'
-          }`}
-          style={{ backgroundColor: '#1E3A5F' }}
+      {/* ── FAB кнопка ── */}
+      <motion.button
+        onClick={handleFabClick}
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.93 }}
+        className="relative rounded-full shadow-xl flex items-center justify-center"
+        // 52px мобил, 56px десктоп
+        style={{
+          width: 52,
+          height: 52,
+          backgroundColor: online ? '#1E3A5F' : '#6b7280',
+        }}
+        aria-label="WhatsApp"
+        title={!online ? tr.offlineBadge : 'WhatsApp'}
+      >
+        {/* Онлайн → зелёный пульс / Офлайн → серый */}
+        <span
+          className="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white"
+          style={{ backgroundColor: online ? '#22c55e' : '#9ca3af' }}
         >
-          {/* Online pulse dot */}
-          {online && !isOpen && (
-            <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white bg-green-400">
-              <span className="absolute inset-0 rounded-full bg-green-400 animate-ping opacity-75" />
-            </span>
+          {online && (
+            <span className="absolute inset-0 rounded-full bg-green-400 animate-ping opacity-60" />
           )}
-          <motion.div
-            animate={{ rotate: isOpen ? 90 : 0 }}
-            transition={{ duration: 0.2 }}
+        </span>
+
+        <motion.div animate={{ rotate: isOpen ? 90 : 0 }} transition={{ duration: 0.2 }}>
+          {isOpen ? <X size={24} color="white" /> : <WhatsAppIcon size={24} />}
+        </motion.div>
+      </motion.button>
+
+      {/* Офлайн подпись */}
+      <AnimatePresence>
+        {!online && !isOpen && (
+          <motion.p
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            className="text-xs text-center text-gray-500 bg-white/90 rounded-lg px-2 py-1 shadow-sm border border-gray-100 leading-tight"
+            style={{ maxWidth: 130 }}
           >
-            {isOpen ? <X size={26} /> : <WhatsAppIcon size={26} />}
-          </motion.div>
-        </button>
-      </div>
+            {tr.offlineNote}
+          </motion.p>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

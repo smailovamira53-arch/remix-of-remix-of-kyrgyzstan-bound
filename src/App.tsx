@@ -35,7 +35,6 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <WhatsAppWidget />
         <Routes>
           {/* Public routes with banner */}
           <Route path="/" element={<><NomadGamesBanner /><Index /></>} />
@@ -61,6 +60,8 @@ const App = () => (
             <Route path="settings" element={<AdminSettings />} />
           </Route>
 
+          {/* WhatsApp widget — только на публичных страницах */}
+<Route path="*" element={<WhatsAppWidget />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

@@ -148,6 +148,26 @@ const description =
                 )}
               </motion.div>
 
+              {/* Highlights */}
+{dbTourFull.highlights?.length > 0 && (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="bg-card rounded-2xl p-6 md:p-8 shadow-lg border border-border"
+  >
+    <h2 className="font-display text-xl font-bold text-foreground mb-4">
+      {t.tourDetail?.highlights || 'Tour Highlights'}
+    </h2>
+    <ul className="grid md:grid-cols-2 gap-3">
+      {dbTourFull.highlights.map((item: string, i: number) => (
+        <li key={i} className="flex items-start gap-3">
+          <Check className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+          <span className="text-muted-foreground">{item}</span>
+        </li>
+      ))}
+    </ul>
+  </motion.div>
+)}
               {/* Itinerary */}
               {dbTourFull.itinerary && dbTourFull.itinerary.length > 0 && (
                 <motion.div
@@ -190,10 +210,11 @@ const description =
                     </h3>
                     <ul className="space-y-2">
                       {(dbTourFull.included || []).map((item: string, i: number) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                          <Check className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />{item}
-                        </li>
-                      ))}
+  <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
+    {item}
+  </li>
+))}
                     </ul>
                   </div>
                   <div className="bg-card rounded-2xl p-6 shadow-lg border border-border">
@@ -202,10 +223,11 @@ const description =
                     </h3>
                     <ul className="space-y-2">
                       {(dbTourFull.not_included || []).map((item: string, i: number) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                          <X className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />{item}
-                        </li>
-                      ))}
+  <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />
+    {item}
+  </li>
+))}
                     </ul>
                   </div>
                 </motion.div>
