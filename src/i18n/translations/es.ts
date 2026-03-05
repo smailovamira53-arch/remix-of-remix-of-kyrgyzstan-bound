@@ -236,6 +236,7 @@ export const es = {
     perNight: '/noche',
     details: 'Detalles',
     max: 'Máx.',
+    backToHome: 'Volver al inicio',
   },
 
   // Travel Tips Page
@@ -667,6 +668,22 @@ export const es = {
     },
   },
 
+  // Search Results Page
+  searchResults: {
+    title: 'Resultados de búsqueda',
+    destinations: 'Destinos',
+    adult: 'adulto',
+    adults: 'adultos',
+    child: 'niño',
+    children: 'niños',
+    searching: 'Buscando...',
+    tourFound: 'tour encontrado',
+    toursFound: 'tours encontrados',
+    noResults: 'No hay tours que coincidan con tu búsqueda.',
+    tryAdjusting: 'Intenta ajustar los filtros o explora todos los tours.',
+    browseAll: 'Ver todos los tours',
+    error: 'Algo salió mal. Por favor intenta de nuevo.',
+  },
   // Booking Form
   bookingForm: {
     title: 'Reservar: {tour}',

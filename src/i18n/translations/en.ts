@@ -218,6 +218,7 @@ export const en = {
 
   // Common
   common: {
+    backToHome: 'Back to Home',
     perPerson: '/person',
     days: 'days',
     day: 'day',
@@ -672,6 +673,22 @@ export const en = {
     },
   },
 
+  // Search Results Page
+  searchResults: {
+    title: 'Search Results',
+    destinations: 'Destinations',
+    adult: 'adult',
+    adults: 'adults',
+    child: 'child',
+    children: 'children',
+    searching: 'Searching...',
+    tourFound: 'tour found',
+    toursFound: 'tours found',
+    noResults: 'No tours match your criteria.',
+    tryAdjusting: 'Try adjusting your filters or explore all tours.',
+    browseAll: 'Browse All Tours',
+    error: 'Something went wrong. Please try again.',
+  },
   // Booking Form
   bookingForm: {
     title: 'Book: {tour}',

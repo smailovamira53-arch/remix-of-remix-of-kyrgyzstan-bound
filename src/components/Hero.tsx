@@ -96,7 +96,7 @@ export const Hero = () => {
             { value: '500+', label: t.hero.stats.travelers },
             { value: '50+', label: t.hero.stats.tours },
             { value: '4.9', label: t.hero.stats.rating },
-            { value: '10+', label: t.hero.stats.experience },
+            { value: '8+', label: t.hero.stats.experience },
           ].map((stat) => (
             <div key={stat.label} className="text-center">
               <p className="text-2xl md:text-3xl font-display font-bold text-primary-foreground">{stat.value}</p>
@@ -106,7 +106,7 @@ export const Hero = () => {
         </motion.div>
       </div>
 
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }} className="absolute bottom-8 left-1/2 -translate-x-1/2">
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }} className="absolute bottom-8 left-1/2 -translate-x-1/2 hidden sm:block">
         <div className="w-6 h-10 rounded-full border-2 border-primary-foreground/30 flex items-start justify-center p-2">
           <motion.div animate={{ y: [0, 12, 0] }} transition={{ repeat: Infinity, duration: 1.5 }} className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />
         </div>

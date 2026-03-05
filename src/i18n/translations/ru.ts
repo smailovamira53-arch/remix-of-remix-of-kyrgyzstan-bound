@@ -236,6 +236,7 @@ export const ru = {
     perNight: '/ночь',
     details: 'Подробнее',
     max: 'Макс.',
+    backToHome: 'На главную',
   },
 
   // Travel Tips Page
@@ -670,6 +671,22 @@ export const ru = {
     },
   },
 
+  // Search Results Page
+  searchResults: {
+    title: 'Результаты поиска',
+    destinations: 'Направления',
+    adult: 'взрослый',
+    adults: 'взрослых',
+    child: 'ребёнок',
+    children: 'детей',
+    searching: 'Поиск...',
+    tourFound: 'тур найден',
+    toursFound: 'туров найдено',
+    noResults: 'Нет туров, соответствующих критериям.',
+    tryAdjusting: 'Попробуйте изменить фильтры или посмотрите все туры.',
+    browseAll: 'Все туры',
+    error: 'Что-то пошло не так. Попробуйте снова.',
+  },
   // Booking Form
   bookingForm: {
     title: 'Бронирование: {tour}',

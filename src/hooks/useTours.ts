@@ -5,14 +5,16 @@ import { Language } from '@/i18n/LanguageContext';
 export type SupabaseTour = {
   id: string;
   slug: string;
-  title: string;
-  title_ru: string;
-  title_es: string;
-  title_ar: string;
-  description: string;
-  description_ru: string;
-  description_es: string;
-  description_ar: string;
+  title: string | null;
+  title_en: string;
+  title_ru: string | null;
+  title_es: string | null;
+  title_ar: string | null;
+  description: string | null;
+  description_en: string | null;
+  description_ru: string | null;
+  description_es: string | null;
+  description_ar: string | null;
   price: number;
   duration: string;
   difficulty: string;
@@ -35,10 +37,16 @@ export function getLocalizedField(
   field: 'title' | 'description',
   lang: Language
 ): string {
-  if (lang === 'en') return tour[field] || '';
-  const key = `${field}_${lang}` as keyof SupabaseTour;
-  const val = tour[key] as string;
-  return val && val.trim() !== '' ? val : tour[field] || '';
+  if (field === 'title') {
+    if (lang === 'ru' && tour.title_ru) return tour.title_ru;
+    if (lang === 'es' && tour.title_es) return tour.title_es;
+    if (lang === 'ar' && tour.title_ar) return tour.title_ar;
+    return tour.title_en || tour.title || '';
+  }
+  if (lang === 'ru' && tour.description_ru) return tour.description_ru;
+  if (lang === 'es' && tour.description_es) return tour.description_es;
+  if (lang === 'ar' && tour.description_ar) return tour.description_ar;
+  return tour.description_en || tour.description || '';
 }
 
 type UseToursOptions = {
@@ -65,7 +73,7 @@ export function useTours(options?: UseToursOptions) {
 
         const { data: result, error: err } = await query;
         if (err) throw err;
-        setData((result as SupabaseTour[]) || []);
+        setData((result as unknown as SupabaseTour[]) || []);
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : 'Error');
       } finally {
