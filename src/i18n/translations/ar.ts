@@ -218,6 +218,7 @@ export const ar = {
 
   // Common
   common: {
+    backToHome: 'العودة للرئيسية',
     perPerson: '/للشخص',
     days: 'أيام',
     day: 'يوم',
