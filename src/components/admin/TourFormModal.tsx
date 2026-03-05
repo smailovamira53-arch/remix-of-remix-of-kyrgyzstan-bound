@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { X, Upload, Trash2 } from 'lucide-react';
+import { X, Upload, Trash2, Plus } from 'lucide-react';
 
 interface TourFormModalProps {
   tour: any | null;
@@ -16,8 +16,8 @@ interface TourFormModalProps {
   onSaved: () => void;
 }
 
-const CATEGORIES = ['Tour Package', 'Day Excursion', 'Expedition', 'Horse Trek', 'Ski Tour', 'Cultural Experience'];
-const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
+const CATEGORIES = ['day', 'package', 'multi-day'];
+const DIFFICULTIES = ['easy', 'moderate', 'hard'];
 const CURRENCIES = ['USD', 'EUR', 'KGS'];
 const LANGS = [
   { key: 'en', label: 'English', titleField: 'title_en', descField: 'description_en' },
@@ -33,33 +33,63 @@ const TourFormModal = ({ tour, onClose, onSaved }: TourFormModalProps) => {
   const [uploading, setUploading] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
 
+  // Парсим itinerary
+  const parseItinerary = (raw: any) => {
+    if (!raw) return [{ day: 1, title: '', description: '' }];
+    if (Array.isArray(raw)) return raw;
+    try { return JSON.parse(raw); } catch { return [{ day: 1, title: '', description: '' }]; }
+  };
+
   const [form, setForm] = useState({
-    title_en: tour?.title_en || tour?.title || '',
+    title_en: tour?.title || tour?.title_en || '',
     title_ru: tour?.title_ru || '',
     title_es: tour?.title_es || '',
     title_ar: tour?.title_ar || '',
-    description_en: tour?.description_en || tour?.description || '',
+    description_en: tour?.description || tour?.description_en || '',
     description_ru: tour?.description_ru || '',
     description_es: tour?.description_es || '',
     description_ar: tour?.description_ar || '',
     price: tour?.price || 0,
     currency: tour?.currency || 'USD',
     duration: tour?.duration || '',
-    duration_days: tour?.duration_days || '',
     max_people: tour?.max_people || 20,
-    difficulty: tour?.difficulty || 'Easy',
-    category: tour?.category || 'Tour Package',
+    difficulty: tour?.difficulty || 'easy',
+    category: tour?.category || 'package',
     is_active: tour?.is_active ?? true,
     is_featured: tour?.is_featured ?? false,
-    cover_image: tour?.cover_image || tour?.image_url || '',
+    cover_image: tour?.image_url || '',
     gallery_images: tour?.gallery_images || [],
     start_date: tour?.start_date || '',
     end_date: tour?.end_date || '',
     status: tour?.status || 'Open',
-    current_bookings: tour?.current_bookings || 0,
+    tags: tour?.tags || '',
+    itinerary: parseItinerary(tour?.itinerary),
+    included: (tour?.included || []).join('\n'),
+    not_included: (tour?.not_included || []).join('\n'),
+    highlights: (tour?.highlights || []).join('\n'),
   });
 
   const set = (field: string, value: any) => setForm(f => ({ ...f, [field]: value }));
+
+  // Itinerary helpers
+  const addDay = () => {
+    const newDay = { day: form.itinerary.length + 1, title: '', description: '' };
+    set('itinerary', [...form.itinerary, newDay]);
+  };
+
+  const removeDay = (idx: number) => {
+    const updated = form.itinerary
+      .filter((_: any, i: number) => i !== idx)
+      .map((d: any, i: number) => ({ ...d, day: i + 1 }));
+    set('itinerary', updated);
+  };
+
+  const updateDay = (idx: number, field: string, value: string) => {
+    const updated = form.itinerary.map((d: any, i: number) =>
+      i === idx ? { ...d, [field]: value } : d
+    );
+    set('itinerary', updated);
+  };
 
   const uploadImage = async (file: File, isGallery = false) => {
     const setter = isGallery ? setUploadingGallery : setUploading;
@@ -107,7 +137,6 @@ const TourFormModal = ({ tour, onClose, onSaved }: TourFormModalProps) => {
     }
     setSaving(true);
 
-    // Generate slug from English title
     const slug = form.title_en
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
@@ -135,7 +164,12 @@ const TourFormModal = ({ tour, onClose, onSaved }: TourFormModalProps) => {
       start_date: form.start_date || null,
       end_date: form.end_date || null,
       status: form.status,
-      current_bookings: Number(form.current_bookings),
+      slug: isEdit ? (tour.slug || slug) : slug,
+      tags: form.tags || '',
+      itinerary: form.itinerary,
+      included: form.included.split('\n').map((s: string) => s.trim()).filter(Boolean),
+      not_included: form.not_included.split('\n').map((s: string) => s.trim()).filter(Boolean),
+      highlights: form.highlights.split('\n').map((s: string) => s.trim()).filter(Boolean),
     };
 
     const { error } = isEdit
@@ -154,14 +188,14 @@ const TourFormModal = ({ tour, onClose, onSaved }: TourFormModalProps) => {
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 overflow-y-auto py-8">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl mx-4">
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-xl font-bold text-gray-900">{isEdit ? 'Edit Tour' : 'Add New Tour'}</h2>
           <button onClick={onClose}><X className="w-5 h-5 text-gray-400 hover:text-gray-600" /></button>
         </div>
 
         <div className="px-6 py-5 space-y-6 max-h-[70vh] overflow-y-auto">
-          {/* Multilingual titles & descriptions */}
+
+          {/* Переводы */}
           <Tabs defaultValue="en">
             <TabsList className="mb-3">
               {LANGS.map(l => (
@@ -193,7 +227,7 @@ const TourFormModal = ({ tour, onClose, onSaved }: TourFormModalProps) => {
             ))}
           </Tabs>
 
-          {/* Core fields */}
+          {/* Основные поля */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <Label>Price</Label>
@@ -209,8 +243,8 @@ const TourFormModal = ({ tour, onClose, onSaved }: TourFormModalProps) => {
               </Select>
             </div>
             <div>
-              <Label>Duration (days)</Label>
-              <Input type="number" value={form.duration_days} onChange={e => set('duration_days', e.target.value)} placeholder="e.g. 5" />
+              <Label>Duration (e.g. "5 Days")</Label>
+              <Input value={form.duration} onChange={e => set('duration', e.target.value)} placeholder="5 Days" />
             </div>
             <div>
               <Label>Max People</Label>
@@ -235,23 +269,16 @@ const TourFormModal = ({ tour, onClose, onSaved }: TourFormModalProps) => {
               </Select>
             </div>
             <div>
+              <Label>Tags (через запятую)</Label>
+              <Input value={form.tags} onChange={e => set('tags', e.target.value)} placeholder="trekking, horse-riding" />
+            </div>
+            <div>
               <Label>Start Date</Label>
               <Input type="date" value={form.start_date} onChange={e => set('start_date', e.target.value)} />
             </div>
             <div>
               <Label>End Date</Label>
               <Input type="date" value={form.end_date} onChange={e => set('end_date', e.target.value)} />
-            </div>
-            <div>
-              <Label>Status</Label>
-              <Select value={form.status} onValueChange={v => set('status', v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Open">Open</SelectItem>
-                  <SelectItem value="Almost Full">Almost Full</SelectItem>
-                  <SelectItem value="Closed">Closed</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
 
@@ -267,17 +294,14 @@ const TourFormModal = ({ tour, onClose, onSaved }: TourFormModalProps) => {
             </div>
           </div>
 
-          {/* Cover image */}
+          {/* Обложка */}
           <div>
             <Label>Cover Image</Label>
             <div className="mt-1 flex items-center gap-4">
               {form.cover_image ? (
                 <div className="relative">
                   <img src={form.cover_image} alt="" className="w-24 h-24 rounded-lg object-cover" />
-                  <button
-                    onClick={() => set('cover_image', '')}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"
-                  >
+                  <button onClick={() => set('cover_image', '')} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5">
                     <X className="w-3 h-3" />
                   </button>
                 </div>
@@ -290,17 +314,14 @@ const TourFormModal = ({ tour, onClose, onSaved }: TourFormModalProps) => {
             </div>
           </div>
 
-          {/* Gallery */}
+          {/* Галерея */}
           <div>
             <Label>Gallery Images (max 10)</Label>
             <div className="mt-2 grid grid-cols-3 sm:grid-cols-5 gap-3">
               {form.gallery_images.map((url: string, idx: number) => (
                 <div key={idx} className="relative group">
                   <img src={url} alt="" className="w-full aspect-square rounded-lg object-cover" />
-                  <button
-                    onClick={() => removeGalleryImage(idx)}
-                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
+                  <button onClick={() => removeGalleryImage(idx)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Trash2 className="w-3 h-3" />
                   </button>
                 </div>
@@ -314,9 +335,77 @@ const TourFormModal = ({ tour, onClose, onSaved }: TourFormModalProps) => {
               )}
             </div>
           </div>
+
+          {/* Маршрут по дням */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <Label className="text-base font-semibold">Itinerary (Day by Day)</Label>
+              <Button type="button" size="sm" variant="outline" onClick={addDay} className="gap-1">
+                <Plus className="w-4 h-4" /> Add Day
+              </Button>
+            </div>
+            <div className="space-y-3">
+              {form.itinerary.map((day: any, idx: number) => (
+                <div key={idx} className="border border-gray-200 rounded-lg p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-sm text-gray-700">Day {day.day}</span>
+                    {form.itinerary.length > 1 && (
+                      <button onClick={() => removeDay(idx)} className="text-red-400 hover:text-red-600">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                  <Input
+                    placeholder="Day title (e.g. Arrival in Bishkek)"
+                    value={day.title}
+                    onChange={e => updateDay(idx, 'title', e.target.value)}
+                  />
+                  <Textarea
+                    placeholder="Day description..."
+                    value={day.description}
+                    onChange={e => updateDay(idx, 'description', e.target.value)}
+                    rows={2}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Включено / Не включено */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label>What's Included (каждый пункт с новой строки)</Label>
+              <Textarea
+                value={form.included}
+                onChange={e => set('included', e.target.value)}
+                placeholder={"Accommodation\nMeals\nGuide"}
+                rows={5}
+              />
+            </div>
+            <div>
+              <Label>Not Included (каждый пункт с новой строки)</Label>
+              <Textarea
+                value={form.not_included}
+                onChange={e => set('not_included', e.target.value)}
+                placeholder={"Flights\nPersonal expenses\nTips"}
+                rows={5}
+              />
+            </div>
+          </div>
+
+          {/* Highlights */}
+          <div>
+            <Label>Highlights (каждый пункт с новой строки)</Label>
+            <Textarea
+              value={form.highlights}
+              onChange={e => set('highlights', e.target.value)}
+              placeholder={"Ride through mountain meadows\nStay in traditional yurts\nSunrise over Son Kul Lake"}
+              rows={4}
+            />
+          </div>
+
         </div>
 
-        {/* Footer */}
         <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200">
           <Button variant="outline" onClick={onClose}>Cancel</Button>
           <Button onClick={handleSave} disabled={saving} className="bg-[#16a34a] hover:bg-[#15803d]">

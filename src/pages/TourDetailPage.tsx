@@ -30,15 +30,17 @@ const TourDetailPage = () => {
     if (!slug) return;
     setLoadingDb(true);
     supabase
-      .from('tours')
-      .select('*')
-      .or(`slug.eq.${slug},id.eq.${slug}`)
-      .eq('is_active', true)
-      .maybeSingle()
-      .then(({ data }) => {
-        setDbTourFull(data);
-        setLoadingDb(false);
-      });
+  .from('tours')
+  .select('*')
+  .eq('slug', slug)
+  .maybeSingle()
+     .then(({ data, error }) => {
+  console.log('Tour data:', data);
+  console.log('Tour error:', error);
+  console.log('Slug:', slug);
+  setDbTourFull(data);
+  setLoadingDb(false);
+});
   }, [slug]);
 
   // Show loading
@@ -57,16 +59,16 @@ const TourDetailPage = () => {
   // If DB tour found — show DB tour page
   if (dbTourFull) {
     const title =
-      language === 'ru' ? dbTourFull.title_ru || dbTourFull.title_en
-      : language === 'es' ? dbTourFull.title_es || dbTourFull.title_en
-      : language === 'ar' ? dbTourFull.title_ar || dbTourFull.title_en
-      : dbTourFull.title_en;
+  language === 'ru' ? dbTourFull.title_ru || dbTourFull.title
+  : language === 'es' ? dbTourFull.title_es || dbTourFull.title
+  : language === 'ar' ? dbTourFull.title_ar || dbTourFull.title
+  : dbTourFull.title;
 
-    const description =
-      language === 'ru' ? dbTourFull.description_ru || dbTourFull.description_en
-      : language === 'es' ? dbTourFull.description_es || dbTourFull.description_en
-      : language === 'ar' ? dbTourFull.description_ar || dbTourFull.description_en
-      : dbTourFull.description_en;
+const description =
+  language === 'ru' ? dbTourFull.description_ru || dbTourFull.description
+  : language === 'es' ? dbTourFull.description_es || dbTourFull.description
+  : language === 'ar' ? dbTourFull.description_ar || dbTourFull.description
+  : dbTourFull.description;
 
     const gallery: string[] = dbTourFull.gallery_images || [];
 
@@ -77,7 +79,7 @@ const TourDetailPage = () => {
         {/* Hero Image */}
         <div className="relative h-[50vh] md:h-[60vh] overflow-hidden">
           <img
-            src={dbTourFull.cover_image || 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&h=600&fit=crop'}
+          src={dbTourFull.image_url || 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&h=600&fit=crop'}
             alt={title}
             className="w-full h-full object-cover"
           />
@@ -114,10 +116,10 @@ const TourDetailPage = () => {
                     <MapPin className="w-4 h-4" />
                     <span>Kyrgyzstan</span>
                   </div>
-                  {dbTourFull.duration_days && (
+                  {dbTourFull.duration && (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Clock className="w-4 h-4" />
-                      <span>{dbTourFull.duration_days} Days</span>
+                      <span>{dbTourFull.duration}</span>
                     </div>
                   )}
                   {dbTourFull.max_people && (
@@ -146,6 +148,68 @@ const TourDetailPage = () => {
                 )}
               </motion.div>
 
+              {/* Itinerary */}
+              {dbTourFull.itinerary && dbTourFull.itinerary.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-card rounded-2xl p-6 md:p-8 shadow-lg border border-border"
+                >
+                  <h2 className="font-display text-xl font-bold text-foreground mb-6">Day-by-Day Itinerary</h2>
+                  <div className="space-y-6">
+                    {dbTourFull.itinerary.map((day: any, index: number) => (
+                      <div key={index} className="flex gap-4">
+                        <div className="flex flex-col items-center">
+                          <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">
+                            {day.day}
+                          </div>
+                          {index < dbTourFull.itinerary.length - 1 && (
+                            <div className="w-0.5 h-full bg-border mt-2" />
+                          )}
+                        </div>
+                        <div className="pb-6">
+                          <h3 className="font-semibold text-foreground mb-2">Day {day.day}: {day.title}</h3>
+                          <p className="text-muted-foreground text-sm leading-relaxed">{day.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Included / Not Included */}
+              {(dbTourFull.included?.length > 0 || dbTourFull.not_included?.length > 0) && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="grid md:grid-cols-2 gap-6"
+                >
+                  <div className="bg-card rounded-2xl p-6 shadow-lg border border-border">
+                    <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                      <Check className="w-5 h-5 text-green-600" /> What's Included
+                    </h3>
+                    <ul className="space-y-2">
+                      {(dbTourFull.included || []).map((item: string, i: number) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                          <Check className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="bg-card rounded-2xl p-6 shadow-lg border border-border">
+                    <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+                      <X className="w-5 h-5 text-red-500" /> Not Included
+                    </h3>
+                    <ul className="space-y-2">
+                      {(dbTourFull.not_included || []).map((item: string, i: number) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                          <X className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </motion.div>
+              )}
               {/* Gallery from Supabase Storage */}
               {gallery.length > 0 && (
                 <motion.div
@@ -190,10 +254,10 @@ const TourDetailPage = () => {
                 </div>
 
                 <div className="space-y-4 mb-6">
-                  {dbTourFull.duration_days && (
+                  {dbTourFull.duration && (
                     <div className="flex items-center gap-3 text-sm">
                       <Calendar className="w-5 h-5 text-primary" />
-                      <span className="text-muted-foreground">{dbTourFull.duration_days} Days</span>
+                      <span className="text-muted-foreground">{dbTourFull.duration}</span>
                     </div>
                   )}
                   {dbTourFull.max_people && (

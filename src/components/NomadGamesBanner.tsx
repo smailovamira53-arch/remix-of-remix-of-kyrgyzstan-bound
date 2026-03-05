@@ -27,19 +27,17 @@ export const NomadGamesBanner = () => {
   const [paused, setPaused] = useState(false);
 
   useEffect(() => {
-  supabase
-    .from('banners' as any)
-    .select('*')
-    .eq('is_active', true)
-    .order('sort_order')
-    .then(({ data, error }: { data: any; error: any }) => {
-      console.log('Banners data:', data);
-      console.log('Banners error:', error);
-      if (data && data.length > 0) {
-        setBanners(data as Banner[]);
-      }
-    });
-}, []);
+    supabase
+      .from('banners')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order')
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setBanners(data as Banner[]);
+        }
+      });
+  }, []);
 
   const next = useCallback(() => {
     setCurrent(c => (c + 1) % banners.length);

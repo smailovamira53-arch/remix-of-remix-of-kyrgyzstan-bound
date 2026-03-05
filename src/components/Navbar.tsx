@@ -1,17 +1,17 @@
-import { useBanner } from '@/context/BannerContext';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, ChevronDown } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { useBanner } from '@/context/BannerContext';
 import logoMmt from '@/assets/logo-header.png';
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
   const { t, isRTL } = useLanguage();
-const { bannerVisible } = useBanner();
+  const { bannerVisible } = useBanner();
 
   const primaryItems = [
     { label: t.nav.home, href: '/' },
@@ -90,7 +90,7 @@ const { bannerVisible } = useBanner();
             <img
               src={logoMmt}
               alt="Mountain Magic Tours"
-              className="h-[50px] md:h-[50px] w-auto object-contain"
+              className="h-[70px] md:h-[70px] w-auto object-contain"
               style={{ mixBlendMode: 'multiply' }}
             />
           </Link>
