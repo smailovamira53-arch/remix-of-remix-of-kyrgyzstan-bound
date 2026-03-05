@@ -14,54 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      banners: {
-        Row: {
-          id: string
-          text_en: string
-          text_ru: string | null
-          text_es: string | null
-          text_ar: string | null
-          link: string | null
-          link_label_en: string | null
-          link_label_ru: string | null
-          link_label_es: string | null
-          link_label_ar: string | null
-          is_active: boolean | null
-          sort_order: number | null
-          created_at: string | null
-        }
-        Insert: {
-          id?: string
-          text_en: string
-          text_ru?: string | null
-          text_es?: string | null
-          text_ar?: string | null
-          link?: string | null
-          link_label_en?: string | null
-          link_label_ru?: string | null
-          link_label_es?: string | null
-          link_label_ar?: string | null
-          is_active?: boolean | null
-          sort_order?: number | null
-          created_at?: string | null
-        }
-        Update: {
-          id?: string
-          text_en?: string
-          text_ru?: string | null
-          text_es?: string | null
-          text_ar?: string | null
-          link?: string | null
-          link_label_en?: string | null
-          link_label_ru?: string | null
-          link_label_es?: string | null
-          link_label_ar?: string | null
-          is_active?: boolean | null
-          sort_order?: number | null
-          created_at?: string | null
-        }
-        Relationships: []
-      }
       tours: {
         Row: {
           category: string

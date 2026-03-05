@@ -218,6 +218,7 @@ export const ar = {
 
   // Common
   common: {
+    backToHome: 'العودة للرئيسية',
     perPerson: '/للشخص',
     days: 'أيام',
     day: 'يوم',
@@ -665,6 +666,23 @@ export const ar = {
       bookNow: 'احجز الآن',
       freeCancel: 'إلغاء مجاني حتى 48 ساعة قبل الموعد',
     },
+  },
+
+  // Search Results Page
+  searchResults: {
+    title: 'نتائج البحث',
+    destinations: 'الوجهات',
+    adult: 'بالغ',
+    adults: 'بالغين',
+    child: 'طفل',
+    children: 'أطفال',
+    searching: 'جارٍ البحث...',
+    tourFound: 'جولة وُجدت',
+    toursFound: 'جولات وُجدت',
+    noResults: 'لا توجد جولات تطابق معاييرك.',
+    tryAdjusting: 'حاول تعديل الفلاتر أو استعرض جميع الجولات.',
+    browseAll: 'تصفح جميع الجولات',
+    error: 'حدث خطأ ما. يرجى المحاولة مرة أخرى.',
   },
 
   // Booking Form
