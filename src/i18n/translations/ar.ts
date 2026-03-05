@@ -667,6 +667,23 @@ export const ar = {
     },
   },
 
+  // Search Results Page
+  searchResults: {
+    title: 'نتائج البحث',
+    destinations: 'الوجهات',
+    adult: 'بالغ',
+    adults: 'بالغين',
+    child: 'طفل',
+    children: 'أطفال',
+    searching: 'جارٍ البحث...',
+    tourFound: 'جولة وُجدت',
+    toursFound: 'جولات وُجدت',
+    noResults: 'لا توجد جولات تطابق معاييرك.',
+    tryAdjusting: 'حاول تعديل الفلاتر أو استعرض جميع الجولات.',
+    browseAll: 'تصفح جميع الجولات',
+    error: 'حدث خطأ ما. يرجى المحاولة مرة أخرى.',
+  },
+
   // Booking Form
   bookingForm: {
     title: 'حجز: {tour}',
