@@ -100,6 +100,7 @@ export default function WhatsAppWidget() {
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [showBubble, setShowBubble] = useState(false);
   const [online, setOnline] = useState(isOnlineNow);
+  const [activeManagerIndex, setActiveManagerIndex] = useState(0);
   const { language } = useLanguage();
   const tr = widgetTranslations[language] || widgetTranslations.en;
 
@@ -109,9 +110,9 @@ export default function WhatsAppWidget() {
     return () => clearInterval(interval);
   }, []);
 
-  // Rotating phrases cycle
+  // Rotating phrases cycle — each phrase from a different manager
   useEffect(() => {
-    if (isOpen) return; // don't show bubble when popup is open
+    if (isOpen) return;
 
     const showNext = () => {
       setShowBubble(true);
@@ -119,13 +120,12 @@ export default function WhatsAppWidget() {
         setShowBubble(false);
         setTimeout(() => {
           setPhraseIndex((i) => (i + 1) % tr.phrases.length);
+          setActiveManagerIndex((i) => (i + 1) % managers.length);
         }, 400);
       }, 3000);
     };
 
-    // Initial delay
     const initialTimeout = setTimeout(showNext, 2000);
-    // Then repeat every 6 seconds
     const interval = setInterval(showNext, 6400);
 
     return () => {
@@ -151,6 +151,7 @@ export default function WhatsAppWidget() {
   };
 
   const currentPhrase = online ? tr.phrases[phraseIndex] : tr.offline;
+  const bubbleManager = managers[activeManagerIndex];
 
   return (
     <div className="fixed bottom-24 right-6 z-50 flex flex-col items-end gap-3">
@@ -170,7 +171,7 @@ export default function WhatsAppWidget() {
               style={{ backgroundColor: '#1E3A5F' }}
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white">
                   <WhatsAppIcon size={22} />
                 </div>
                 <div>
@@ -194,7 +195,6 @@ export default function WhatsAppWidget() {
                   onClick={() => handleManagerClick(m.phone)}
                   className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors text-left group"
                 >
-                  {/* Avatar with online dot */}
                   <div className="relative flex-shrink-0">
                     <img
                       src={m.photo}
@@ -215,7 +215,7 @@ export default function WhatsAppWidget() {
                       {m.role} · {m.langs}
                     </p>
                   </div>
-                  <div className="w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-white">
                     <WhatsAppIcon size={16} />
                   </div>
                 </button>
@@ -237,32 +237,48 @@ export default function WhatsAppWidget() {
 
       {/* Bubble + FAB row */}
       <div className="flex items-center gap-2">
-        {/* Sliding text bubble */}
+        {/* Chat-style message bubble with manager avatar */}
         <AnimatePresence>
           {showBubble && !isOpen && (
             <motion.div
-              initial={{ opacity: 0, x: 20, scale: 0.8 }}
+              initial={{ opacity: 0, x: 30, scale: 0.8 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
-              exit={{ opacity: 0, x: 20, scale: 0.8 }}
+              exit={{ opacity: 0, x: 30, scale: 0.8 }}
               transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-              className="bg-white rounded-full shadow-lg px-4 py-2.5 max-w-[220px] cursor-pointer border border-gray-100"
+              className="flex items-end gap-2 cursor-pointer"
               onClick={handleFabClick}
             >
-              <p className="text-xs font-medium text-gray-700 whitespace-nowrap overflow-hidden text-ellipsis">
-                {currentPhrase}
-              </p>
+              {/* Manager avatar */}
+              <div className="relative flex-shrink-0">
+                <img
+                  src={bubbleManager.photo}
+                  alt={bubbleManager.name}
+                  className="w-8 h-8 rounded-full object-cover shadow-md"
+                />
+                {online && (
+                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white bg-green-500" />
+                )}
+              </div>
+              {/* Message bubble */}
+              <div className="bg-white rounded-2xl rounded-bl-md shadow-lg px-4 py-2.5 max-w-[210px] border border-gray-100">
+                <p className="text-[11px] font-medium text-gray-700 leading-relaxed">
+                  {currentPhrase}
+                </p>
+                <p className="text-[9px] text-gray-400 mt-0.5">{bubbleManager.name}</p>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* FAB button */}
+        {/* FAB button — #1E3A5F */}
         <button
           onClick={handleFabClick}
           className={`relative w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 text-white ${
             online
-              ? 'bg-[#25D366] hover:bg-[#20BD5A] hover:scale-110 hover:shadow-xl'
-              : 'bg-gray-400/80 hover:bg-gray-400 hover:scale-105'
+              ? 'hover:scale-110 hover:shadow-xl'
+              : 'opacity-70 hover:opacity-90 hover:scale-105'
           }`}
+          style={{ backgroundColor: '#1E3A5F' }}
         >
           {/* Online pulse dot */}
           {online && !isOpen && (
