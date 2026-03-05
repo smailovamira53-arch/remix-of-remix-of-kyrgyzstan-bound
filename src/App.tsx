@@ -27,6 +27,7 @@ import WhatsAppWidget from "./components/WhatsAppWidget";
 
 const queryClient = new QueryClient();
 
+// App component
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <BannerProvider>
