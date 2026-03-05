@@ -1,45 +1,43 @@
+import { useBanner } from '@/context/BannerContext';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, ChevronDown } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useLanguage } from '@/i18n/LanguageContext';
-import logoMmt from '@/assets/logo-header-blue.png';
+import logoMmt from '@/assets/logo-header.png';
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
   const { t, isRTL } = useLanguage();
+const { bannerVisible } = useBanner();
 
-  // Primary nav items shown directly
   const primaryItems = [
     { label: t.nav.home, href: '/' },
     { 
       label: t.nav.tours, 
       href: '/tours',
       submenu: [
-        { label: t.nav.tourPackages, href: '/tours/packages' },
-        { label: t.nav.dayExcursions, href: '/tours/excursions' },
-        { label: t.nav.multiDayTours, href: '/tours/multi-day' },
+        { label: t.nav.tourPackages,  href: '/tours?category=package'  },
+        { label: t.nav.dayExcursions, href: '/tours?category=day'       },
+        { label: t.nav.multiDayTours, href: '/tours?category=multi-day' },
       ]
     },
     { label: t.nav.adventure || 'Expeditions', href: '/expeditions' },
-    { label: t.nav.accommodations, href: '/accommodations' },
     { label: t.nav.contact, href: '/contact' },
   ];
 
-  // Items grouped under "More"
   const moreItems = [
     { label: t.nav.guides || 'Guides', href: '/guides' },
     { label: t.nav.travelTips || 'Travel Tips', href: '/travel-tips' },
     { label: t.nav.aboutKyrgyzstan, href: '/about' },
   ];
 
-  // All items for mobile menu
   const allItems: Array<{ label: string; href: string; submenu?: Array<{ label: string; href: string }> }> = [
     ...primaryItems.slice(0, -1),
     ...moreItems,
-    primaryItems[primaryItems.length - 1], // Contact last
+    primaryItems[primaryItems.length - 1],
   ];
 
   const renderDesktopItem = (item: typeof primaryItems[0]) => (
@@ -84,23 +82,22 @@ export const Navbar = () => {
   );
 
   return (
-    <nav className="fixed top-[36px] left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50">
+    <nav className={`fixed ${bannerVisible ? 'top-[36px]' : 'top-0'} left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/50 transition-all duration-300`}>
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo */}
+
           <Link to="/" className="flex-shrink-0">
-            <img 
-              src={logoMmt} 
-              alt="Mountain Magic Tours" 
-              className="h-[50px] md:h-[58px] w-auto object-contain"
+            <img
+              src={logoMmt}
+              alt="Mountain Magic Tours"
+              className="h-[50px] md:h-[50px] w-auto object-contain"
+              style={{ mixBlendMode: 'multiply' }}
             />
           </Link>
 
-          {/* Desktop Navigation */}
           <div className={`hidden lg:flex items-center gap-0.5 xl:gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
             {primaryItems.slice(0, -1).map(renderDesktopItem)}
 
-            {/* More dropdown */}
             <div
               className="relative"
               onMouseEnter={() => setActiveSubmenu('more')}
@@ -135,29 +132,22 @@ export const Navbar = () => {
               </AnimatePresence>
             </div>
 
-            {/* Contact button */}
             {renderDesktopItem(primaryItems[primaryItems.length - 1])}
           </div>
 
-          {/* Language Switcher (desktop) */}
           <div className={`hidden lg:flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
             <LanguageSwitcher />
           </div>
 
-          {/* Mobile Menu Toggle */}
           <div className="lg:hidden flex items-center gap-2">
             <LanguageSwitcher />
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="p-2 text-foreground"
-            >
+            <button onClick={() => setIsOpen(!isOpen)} className="p-2 text-foreground">
               {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {isOpen && (
           <motion.div

@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { ArrowLeft, SlidersHorizontal, X, Package, Sun, Mountain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { toursData, TourCategory } from '@/data/toursData';
+import { TourCategory } from '@/data/toursData';
 import { TourCard } from '@/components/TourCard';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
@@ -23,66 +23,73 @@ const ToursPage = () => {
   const { t, language, isRTL } = useLanguage();
   const { data: dbTours = [], isLoading } = useTours();
 
-  const initialType = params.get('type') || '';
   const initialDestinations = params.get('destinations')?.split(',') || [];
   const initialRegion = initialDestinations.length === 1
     ? REGIONS.find(r => r.toLowerCase() === initialDestinations[0].toLowerCase()) || ''
     : '';
 
-  const [activeCategory, setActiveCategory] = useState<TourCategory | 'all'>('all');
-  const [selectedType, setSelectedType] = useState(initialType);
+  const categoryFromUrl = (params.get('category') as TourCategory) || 'all';
+  const tagFromUrl = params.get('tag') || '';
+
+  const [activeCategory, setActiveCategory] = useState<TourCategory | 'all'>(categoryFromUrl);
   const [selectedRegion, setSelectedRegion] = useState(initialRegion);
   const [selectedDuration, setSelectedDuration] = useState('');
   const [selectedPrice, setSelectedPrice] = useState('');
   const [searchQuery, setSearchQuery] = useState(
     initialDestinations.length > 0 && !initialRegion ? initialDestinations.join(' ') : ''
   );
-  const [showFilters, setShowFilters] = useState(true);const CATEGORY_TABS: { key: TourCategory | 'all'; label: string; icon: typeof Package }[] = [
-    { key: 'all', label: t.toursPage.categories.all, icon: Mountain },
-    { key: 'package', label: t.toursPage.categories.packages, icon: Package },
-    { key: 'day', label: t.toursPage.categories.dayExcursions, icon: Sun },
-    { key: 'multi-day', label: t.toursPage.categories.multiDay, icon: Mountain },
+  const [showFilters, setShowFilters] = useState(true);
+
+  const CATEGORY_TABS: { key: TourCategory | 'all'; label: string; icon: typeof Package }[] = [
+    { key: 'all',       label: t.toursPage.categories.all,          icon: Mountain },
+    { key: 'package',   label: t.toursPage.categories.packages,     icon: Package  },
+    { key: 'day',       label: t.toursPage.categories.dayExcursions, icon: Sun     },
+    { key: 'multi-day', label: t.toursPage.categories.multiDay,     icon: Mountain },
   ];
 
   const DURATIONS = [
     { key: '1-3', label: t.toursPage.durations.d13 },
     { key: '4-7', label: t.toursPage.durations.d47 },
-    { key: '8+', label: t.toursPage.durations.d8 },
+    { key: '8+',  label: t.toursPage.durations.d8  },
   ];
 
   const PRICE_RANGES = [
-    { key: '0-300', label: t.toursPage.priceRanges.under300 },
-    { key: '300-600', label: t.toursPage.priceRanges.mid },
-    { key: '600+', label: t.toursPage.priceRanges.over600 },
+    { key: '0-300',   label: t.toursPage.priceRanges.under300 },
+    { key: '300-600', label: t.toursPage.priceRanges.mid      },
+    { key: '600+',    label: t.toursPage.priceRanges.over600  },
   ];
 
   const dbToursFormatted = useMemo(() => {
     return dbTours.map(tour => ({
       slug: tour.slug || tour.id,
-      image: tour.cover_image || 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&h=600&fit=crop',
-      title: language === 'ru' ? (tour.title_ru || tour.title_en)
-           : language === 'es' ? (tour.title_es || tour.title_en)
-           : language === 'ar' ? (tour.title_ar || tour.title_en)
-           : tour.title_en,
+      image: tour.image_url || 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&h=600&fit=crop',
+      title: language === 'ru' ? (tour.title_ru || tour.title)
+           : language === 'es' ? (tour.title_es || tour.title)
+           : language === 'ar' ? (tour.title_ar || tour.title)
+           : tour.title,
       location: 'Kyrgyzstan',
-      duration: tour.duration_days ? `${tour.duration_days} Days` : '1 Day',
+      duration: tour.duration || '1 Day',
       price: tour.price || 0,
       rating: 5.0,
       reviewCount: 0,
       featured: tour.is_featured || false,
-      category: 'package' as TourCategory,
+      category: (tour.category || 'package') as TourCategory,
+      tags: (tour as any).tags || '',
       isFromDB: true,
     }));
   }, [dbTours, language]);
 
   const allTours = useMemo(() => {
-    const staticTours = toursData.map(t => ({ ...t, isFromDB: false }));
-    return [...dbToursFormatted, ...staticTours];
+    return [...dbToursFormatted];
   }, [dbToursFormatted]);
 
   const filtered = useMemo(() => {
     return allTours.filter(tour => {
       if (activeCategory !== 'all' && tour.category !== activeCategory) return false;
+      if (tagFromUrl) {
+        const tourTags = (tour.tags || '').toLowerCase();
+        if (!tourTags.includes(tagFromUrl.toLowerCase())) return false;
+      }
       if (selectedRegion) {
         const loc = `${tour.location} ${tour.title}`.toLowerCase();
         if (!loc.includes(selectedRegion.toLowerCase())) return false;
@@ -105,17 +112,18 @@ const ToursPage = () => {
       }
       return true;
     });
-  }, [allTours, activeCategory, selectedRegion, selectedDuration, selectedPrice, searchQuery]);
+  }, [allTours, activeCategory, tagFromUrl, selectedRegion, selectedDuration, selectedPrice, searchQuery]);
 
-  const hasFilters = selectedType || selectedRegion || selectedDuration || selectedPrice || searchQuery;
+  const hasFilters = selectedRegion || selectedDuration || selectedPrice || searchQuery;
 
   const clearFilters = () => {
-    setSelectedType('');
     setSelectedRegion('');
     setSelectedDuration('');
     setSelectedPrice('');
     setSearchQuery('');
-  };return (
+  };
+
+  return (
     <div className={`min-h-screen bg-background ${isRTL ? 'rtl' : 'ltr'}`}>
       <Navbar />
       <main className="pt-32 pb-16">
@@ -132,6 +140,7 @@ const ToursPage = () => {
               {isLoading ? 'Loading...' : `${filtered.length} ${t.toursPage.toursFound}`}
             </p>
           </div>
+
           <div className="flex flex-wrap gap-2 mb-8">
             {CATEGORY_TABS.map(tab => {
               const Icon = tab.icon;
@@ -145,6 +154,7 @@ const ToursPage = () => {
               );
             })}
           </div>
+
           <div className="flex items-center justify-between mb-4">
             <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowFilters(!showFilters)}>
               <SlidersHorizontal className="w-4 h-4" />
@@ -156,6 +166,7 @@ const ToursPage = () => {
               </button>
             )}
           </div>
+
           {showFilters && (
             <div className="bg-card border border-border rounded-xl p-6 mb-8 space-y-4">
               <div>
@@ -195,6 +206,7 @@ const ToursPage = () => {
               </div>
             </div>
           )}
+
           {filtered.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filtered.map(tour => (

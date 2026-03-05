@@ -1,58 +1,79 @@
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { Language } from '@/i18n/LanguageContext';
 
-export interface Tour {
+export type SupabaseTour = {
   id: string;
   slug: string;
-  title_en: string;
-  title_ru: string | null;
-  title_es: string | null;
-  title_ar: string | null;
-  description_en: string | null;
-  description_ru: string | null;
-  description_es: string | null;
-  description_ar: string | null;
+  title: string;
+  title_ru: string;
+  title_es: string;
+  title_ar: string;
+  description: string;
+  description_ru: string;
+  description_es: string;
+  description_ar: string;
   price: number;
-  currency: string | null;
-  duration_days: number | null;
-  max_people: number | null;
-  difficulty: string | null;
-  category: string | null;
-  is_active: boolean | null;
-  is_featured: boolean | null;
-  cover_image: string | null;
-  gallery_images: string[] | null;
-  created_at: string | null;
+  duration: string;
+  difficulty: string;
+  category: string;
+  image_url: string | null;
+  gallery_images: string[];
+  is_featured: boolean;
+  is_active: boolean;
+  max_people: number;
+  currency: string;
+  status: string;
+  start_date: string | null;
+  end_date: string | null;
+  current_bookings: number;
+  tags: string;
+};
+
+export function getLocalizedField(
+  tour: SupabaseTour,
+  field: 'title' | 'description',
+  lang: Language
+): string {
+  if (lang === 'en') return tour[field] || '';
+  const key = `${field}_${lang}` as keyof SupabaseTour;
+  const val = tour[key] as string;
+  return val && val.trim() !== '' ? val : tour[field] || '';
 }
 
-export const useTours = () => {
-  return useQuery({
-    queryKey: ['tours'],
-    queryFn: async (): Promise<Tour[]> => {
-      const { data, error } = await supabase
-        .from('tours')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return (data ?? []) as unknown as Tour[];
-    },
-  });
+type UseToursOptions = {
+  featured?: boolean;
+  category?: string;
 };
 
-export const useTourBySlug = (slug: string) => {
-  return useQuery({
-    queryKey: ['tour', slug],
-    queryFn: async (): Promise<Tour> => {
-      const { data, error } = await supabase
-        .from('tours')
-        .select('*')
-        .eq('title', slug)
-        .limit(1)
-        .single() as { data: any; error: any };
-      if (error) throw error;
-      return data as unknown as Tour;
-    },
-    enabled: !!slug,
-  });
-};
+export function useTours(options?: UseToursOptions) {
+  const [data, setData] = useState<SupabaseTour[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchTours() {
+      try {
+        setIsLoading(true);
+        let query = supabase
+          .from('tours')
+          .select('*')
+          .eq('is_active', true);
+
+        if (options?.featured) query = query.eq('is_featured', true);
+        if (options?.category) query = query.eq('category', options.category);
+
+        const { data: result, error: err } = await query;
+        if (err) throw err;
+        setData((result as SupabaseTour[]) || []);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Error');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchTours();
+  }, [options?.featured, options?.category]);
+
+  return { data, isLoading, error };
+}

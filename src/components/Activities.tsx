@@ -23,7 +23,7 @@ export const Activities = () => {
         <SectionHeader subtitle={t.activities.subtitle} title={t.activities.title} description={t.activities.description} />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {activities.map((activity, index) => (
-            <Link to={`/tours?type=${activity.type}`} key={activity.title}>
+            <Link to={`/tours?tag=${activity.type}`} key={activity.title}>
               <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: index * 0.1 }} className="group bg-card rounded-2xl p-6 hover:shadow-lg transition-all duration-300 border border-border/50 cursor-pointer">
                 <div className="flex items-start gap-4">
                   <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:scale-110 transition-all duration-300">
