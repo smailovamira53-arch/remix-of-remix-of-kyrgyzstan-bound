@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, Calendar, Users, ChevronDown, ChevronUp, Minus, Plus, X } from 'lucide-react';
+import { Search, MapPin, Calendar, Users, ChevronDown, ChevronUp, Minus, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Calendar as CalendarUI } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -9,21 +9,40 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 const destinations = {
-  Kyrgyzstan: ['Issyk-Kul', 'Song-Kul', 'Ala-Archa', 'Jeti-Oguz', 'Bishkek', 'Karakol', 'Osh', 'Pamir'],
-  Kazakhstan: ['Almaty', 'Charyn Canyon', 'Kolsai Lakes', 'Astana'],
-  Uzbekistan: ['Samarkand', 'Bukhara', 'Tashkent', 'Khiva'],
+  Kyrgyzstan: [
+    'Issyk-Kul Lake',
+    'Ala-Archa Gorge',
+    'Song-Kul Lake',
+    'Jeti-Oguz Canyon',
+    'Karakol',
+    'Skazka Canyon',
+    'Altyn Arashan',
+    'Tash Rabat',
+    'Burana Tower',
+    'Arslanbob',
+    'Osh',
+    'Sary-Chelek Lake',
+    'Kel-Suu Lake',
+    'Lenin Peak Base Camp',
+    'Jyrgalan Valley',
+  ],
+  Kazakhstan: [
+    'Big Almaty Lake',
+    'Charyn Canyon',
+    'Kolsai Lakes',
+    'Kaindy Lake',
+    'Almaty',
+    'Turkestan',
+  ],
+  Uzbekistan: [
+    'Tashkent',
+    'Samarkand',
+    'Bukhara',
+    'Khiva',
+  ],
 };
 
 type Country = keyof typeof destinations;
-
-// Season helper for 2026-2027
-function getSeasonColor(date: Date): string {
-  const m = date.getMonth(); // 0-indexed
-  if (m >= 5 && m <= 8) return 'bg-green-400/30 text-green-900'; // Jun-Sep peak
-  if (m === 4 || m === 9) return 'bg-yellow-400/30 text-yellow-900'; // May, Oct shoulder
-  if (m >= 10 || m <= 3) return 'bg-red-400/20 text-red-900'; // Nov-Apr low
-  return '';
-}
 
 function isLowSeason(date: Date): boolean {
   const m = date.getMonth();
@@ -34,16 +53,11 @@ export const HeroSearchForm = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
 
-  // Destinations
   const [selectedDests, setSelectedDests] = useState<string[]>([]);
   const [expandedCountries, setExpandedCountries] = useState<Country[]>([]);
-
-  // Dates
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [showSeasonWarning, setShowSeasonWarning] = useState(false);
   const [pendingDate, setPendingDate] = useState<Date | undefined>();
-
-  // Travelers
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
   const [infants, setInfants] = useState(0);
@@ -105,23 +119,19 @@ export const HeroSearchForm = () => {
 
   const travelersLabel = `${adults} Adult${adults > 1 ? 's' : ''}${children > 0 ? `, ${children} Child${children > 1 ? 'ren' : ''}` : ''}${infants > 0 ? `, ${infants} Infant${infants > 1 ? 's' : ''}` : ''}`;
 
-  const Counter = ({ label, value, onChange, min, max }: { label: string; value: number; onChange: (v: number) => void; min: number; max: number }) => (
+  const Counter = ({ label, value, onChange, min, max }: {
+    label: string; value: number; onChange: (v: number) => void; min: number; max: number;
+  }) => (
     <div className="flex items-center justify-between py-2">
       <span className="text-sm text-foreground">{label}</span>
       <div className="flex items-center gap-3">
-        <button
-          onClick={() => onChange(Math.max(min, value - 1))}
-          disabled={value <= min}
-          className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-foreground disabled:opacity-30 hover:bg-muted transition-colors"
-        >
+        <button onClick={() => onChange(Math.max(min, value - 1))} disabled={value <= min}
+          className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-foreground disabled:opacity-30 hover:bg-muted transition-colors">
           <Minus className="w-3 h-3" />
         </button>
         <span className="text-sm font-medium w-4 text-center text-foreground">{value}</span>
-        <button
-          onClick={() => onChange(Math.min(max, value + 1))}
-          disabled={value >= max}
-          className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-foreground disabled:opacity-30 hover:bg-muted transition-colors"
-        >
+        <button onClick={() => onChange(Math.min(max, value + 1))} disabled={value >= max}
+          className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-foreground disabled:opacity-30 hover:bg-muted transition-colors">
           <Plus className="w-3 h-3" />
         </button>
       </div>
@@ -131,6 +141,7 @@ export const HeroSearchForm = () => {
   return (
     <div className="bg-card/95 backdrop-blur-lg rounded-2xl shadow-lg p-4 md:p-6 border border-border/50">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+
         {/* Destinations */}
         <Popover>
           <PopoverTrigger asChild>
@@ -143,7 +154,7 @@ export const HeroSearchForm = () => {
             </button>
           </PopoverTrigger>
           <PopoverContent className="w-72 p-3 pointer-events-auto" align="start">
-            <div className="space-y-1 max-h-[300px] overflow-y-auto">
+            <div className="space-y-1 max-h-[320px] overflow-y-auto pr-1">
               {(Object.keys(destinations) as Country[]).map(country => {
                 const subs = destinations[country];
                 const allSelected = subs.every(s => selectedDests.includes(s));
@@ -268,7 +279,7 @@ export const HeroSearchForm = () => {
           </PopoverContent>
         </Popover>
 
-        {/* Search */}
+        {/* Search Button */}
         <Button size="lg" className="h-full min-h-[52px] gap-2" onClick={handleSearch}>
           <Search className="w-4 h-4" />
           {t.hero.searchTours}

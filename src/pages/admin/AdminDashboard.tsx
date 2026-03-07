@@ -4,27 +4,43 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Map, DollarSign, CalendarCheck, TrendingUp } from 'lucide-react';
 
 const AdminDashboard = () => {
-  const [stats, setStats] = useState({ total: 0, active: 0, featured: 0, totalBookings: 0 });
+  const [stats, setStats] = useState({
+    totalTours: 0,
+    activeTours: 0,
+    totalBookings: 0,
+    newBookings: 0,
+    totalExpeditions: 0,
+    activeExpeditions: 0,
+  });
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from('tours').select('*');
-      if (data) {
-        setStats({
-          total: data.length,
-          active: data.filter(t => t.is_active).length,
-          featured: data.filter(t => t.is_featured).length,
-          totalBookings: data.reduce((s, t) => s + t.current_bookings, 0),
-        });
-      }
+      const [toursRes, bookingsRes, expeditionsRes] = await Promise.all([
+        supabase.from('tours').select('is_active'),
+        supabase.from('bookings').select('status'),
+        supabase.from('expeditions').select('is_active'),
+      ]);
+
+      const tours = toursRes.data || [];
+      const bookings = bookingsRes.data || [];
+      const expeditions = expeditionsRes.data || [];
+
+      setStats({
+        totalTours:        tours.length,
+        activeTours:       tours.filter(t => t.is_active).length,
+        totalBookings:     bookings.length,
+        newBookings:       bookings.filter(b => b.status === 'new').length,
+        totalExpeditions:  expeditions.length,
+        activeExpeditions: expeditions.filter(e => e.is_active).length,
+      });
     })();
   }, []);
 
   const cards = [
-    { label: 'Total Tours', value: stats.total, icon: Map, color: 'text-green-600' },
-    { label: 'Active Tours', value: stats.active, icon: TrendingUp, color: 'text-blue-600' },
-    { label: 'Featured Tours', value: stats.featured, icon: DollarSign, color: 'text-amber-600' },
-    { label: 'Total Bookings', value: stats.totalBookings, icon: CalendarCheck, color: 'text-purple-600' },
+    { label: 'Total Tours', value: stats.totalTours, sub: `${stats.activeTours} active`, icon: Map, color: 'text-green-600' },
+    { label: 'Expeditions', value: stats.totalExpeditions, sub: `${stats.activeExpeditions} active`, icon: TrendingUp, color: 'text-blue-600' },
+    { label: 'New Bookings', value: stats.newBookings, sub: 'awaiting confirmation', icon: CalendarCheck, color: 'text-amber-600' },
+    { label: 'Total Bookings', value: stats.totalBookings, sub: 'all time', icon: DollarSign, color: 'text-purple-600' },
   ];
 
   return (
@@ -39,6 +55,7 @@ const AdminDashboard = () => {
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold text-gray-900">{c.value}</p>
+              <p className="text-xs text-gray-400 mt-1">{c.sub}</p>
             </CardContent>
           </Card>
         ))}

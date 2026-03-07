@@ -4,7 +4,7 @@ import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
 import { AdminLogin } from '@/components/AdminLogin';
 import { Button } from '@/components/ui/button';
 import {
-  LayoutDashboard, Map, CalendarCheck, Settings, LogOut, Menu, X, Mountain
+  LayoutDashboard, Map, CalendarCheck, Settings, LogOut, Menu, X, Mountain, Megaphone, Compass
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -12,7 +12,9 @@ import { cn } from '@/lib/utils';
 const navItems = [
   { label: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
   { label: 'Tours', icon: Map, path: '/admin/tours' },
+  { label: 'Expeditions', icon: Compass, path: '/admin/expeditions' },
   { label: 'Bookings', icon: CalendarCheck, path: '/admin/bookings' },
+  { label: 'Banners', icon: Megaphone, path: '/admin/banners' },
   { label: 'Settings', icon: Settings, path: '/admin/settings' },
 ];
 

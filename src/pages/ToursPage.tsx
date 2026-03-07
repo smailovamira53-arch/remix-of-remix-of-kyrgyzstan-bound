@@ -81,6 +81,9 @@ const ToursPage = () => {
     category: (tour.category || 'package') as TourCategory,
     tags: (tour as any).tags || '',
     destinations: (tour as any).destinations || [],
+    isEvent: tour.is_event ?? false,
+    difficulty: tour.difficulty,
+    difficulty: (tour as any).difficulty ?? undefined,
   })), [dbTours, language]);
 
   const filtered = useMemo(() => dbToursFormatted.filter(tour => {
@@ -316,6 +319,8 @@ const ToursPage = () => {
                   reviewCount={tour.reviewCount}
                   featured={tour.featured}
                   slug={tour.slug}
+                  isEvent={tour.isEvent}
+                  difficulty={tour.difficulty}
                 />
               ))}
             </div>

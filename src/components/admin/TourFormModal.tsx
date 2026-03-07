@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { X, Upload, Trash2, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 
@@ -19,33 +18,118 @@ interface TourFormModalProps {
 const CATEGORIES = ['day', 'package', 'multi-day'];
 const TAGS = ['trekking', 'horse-riding', 'ski-touring', 'yurt-camping', 'photography-tours', 'mountain-biking'];
 const TAG_LABELS: Record<string, string> = {
-  'trekking': 'Trekking',
-  'horse-riding': 'Horse Riding',
-  'ski-touring': 'Ski Touring',
-  'yurt-camping': 'Yurt Camping',
-  'photography-tours': 'Photography Tours',
-  'mountain-biking': 'Mountain Biking',
+  'trekking': 'Trekking', 'horse-riding': 'Horse Riding', 'ski-touring': 'Ski Touring',
+  'yurt-camping': 'Yurt Camping', 'photography-tours': 'Photography Tours', 'mountain-biking': 'Mountain Biking',
 };
 const DESTINATION_GROUPS = {
-  Kyrgyzstan: [
-    'Issyk-Kul Lake', 'Ala-Archa Gorge', 'Song-Kul Lake', 'Jeti-Oguz Canyon',
-    'Karakol', 'Skazka Canyon', 'Altyn Arashan', 'Tash Rabat', 'Burana Tower',
-    'Arslanbob', 'Osh', 'Sary-Chelek Lake', 'Kel-Suu Lake', 'Lenin Peak Base Camp',
-    'Jyrgalan Valley',
-  ],
-  Kazakhstan: ['Big Almaty Lake', 'Charyn Canyon', 'Kolsai Lakes', 'Kaindy Lake', 'Almaty', 'Turkestan'],
-  Uzbekistan: ['Tashkent', 'Samarkand', 'Bukhara', 'Khiva'],
+  Kyrgyzstan: ['Issyk-Kul Lake','Ala-Archa Gorge','Song-Kul Lake','Jeti-Oguz Canyon','Karakol','Skazka Canyon','Altyn Arashan','Tash Rabat','Burana Tower','Arslanbob','Osh','Sary-Chelek Lake','Kel-Suu Lake','Lenin Peak Base Camp','Jyrgalan Valley'],
+  Kazakhstan: ['Big Almaty Lake','Charyn Canyon','Kolsai Lakes','Kaindy Lake','Almaty','Turkestan'],
+  Uzbekistan: ['Tashkent','Samarkand','Bukhara','Khiva'],
 };
-
 const DIFFICULTIES = ['easy', 'medium', 'hard'];
 const CURRENCIES = ['USD', 'EUR', 'KGS'];
+
+const LANG_BORDER: Record<string, string> = {
+  en: 'border-blue-400',
+  ru: 'border-green-400',
+  es: 'border-orange-400',
+  ar: 'border-purple-400',
+};
+const LANG_BADGE: Record<string, string> = {
+  en: 'bg-blue-100 text-blue-700 border-blue-300',
+  ru: 'bg-green-100 text-green-700 border-green-300',
+  es: 'bg-orange-100 text-orange-700 border-orange-300',
+  ar: 'bg-purple-100 text-purple-700 border-purple-300',
+};
+const LANG_LABEL: Record<string, string> = {
+  en: 'EN 🇬🇧', ru: 'RU 🇷🇺', es: 'ES 🇪🇸', ar: 'AR 🇸🇦',
+};
+const LANGS = ['en', 'ru', 'es', 'ar'] as const;
+
+// ── Одно поле с бейджем языка (без скролла при фокусе) ──────────────────────
+const LangTextarea = ({ lang, value, onChange, rows = 4 }: {
+  lang: string; value: string; onChange: (v: string) => void; rows?: number;
+}) => {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  return (
+    <div className={`relative border-2 rounded-xl ${LANG_BORDER[lang]} bg-white overflow-hidden`}>
+      <span className={`absolute top-2 left-2.5 text-[11px] font-bold px-1.5 py-0.5 rounded border ${LANG_BADGE[lang]} z-10 pointer-events-none select-none`}>
+        {LANG_LABEL[lang]}
+      </span>
+      <textarea
+        ref={ref}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        dir={lang === 'ar' ? 'rtl' : undefined}
+        rows={rows}
+        onFocus={() => {/* prevent scroll */}}
+        className="w-full pt-8 px-3 pb-2 text-sm bg-transparent resize-none outline-none focus:outline-none border-none"
+        style={{ scrollMargin: 0 }}
+      />
+    </div>
+  );
+};
+
+const LangInput = ({ lang, value, onChange, placeholder }: {
+  lang: string; value: string; onChange: (v: string) => void; placeholder?: string;
+}) => (
+  <div className={`relative border-2 rounded-xl ${LANG_BORDER[lang]} bg-white overflow-hidden`}>
+    <span className={`absolute top-1/2 -translate-y-1/2 left-2.5 text-[11px] font-bold px-1.5 py-0.5 rounded border ${LANG_BADGE[lang]} z-10 pointer-events-none select-none`}>
+      {LANG_LABEL[lang]}
+    </span>
+    <input
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      dir={lang === 'ar' ? 'rtl' : undefined}
+      placeholder={placeholder}
+      className="w-full pl-16 pr-3 py-2.5 text-sm bg-transparent outline-none focus:outline-none border-none"
+    />
+  </div>
+);
+
+// ── 4 поля 2×2 ──────────────────────────────────────────────────────────────
+const QuadTextarea = ({ label, fieldBase, rows = 4, hint, g, set }: {
+  label: string; fieldBase: string; rows?: number; hint?: string;
+  g: (k: string) => any; set: (k: string, v: any) => void;
+}) => (
+  <div>
+    <Label className="mb-2 block text-sm font-semibold">
+      {label}{hint && <span className="text-gray-400 font-normal text-xs ml-1.5">{hint}</span>}
+    </Label>
+    <div className="grid grid-cols-2 gap-3">
+      {LANGS.map(lang => (
+        <LangTextarea key={lang} lang={lang} value={g(`${fieldBase}_${lang}`)} onChange={v => set(`${fieldBase}_${lang}`, v)} rows={rows} />
+      ))}
+    </div>
+  </div>
+);
+
+const QuadInput = ({ label, fieldBase, hint, g, set }: {
+  label: string; fieldBase: string; hint?: string;
+  g: (k: string) => any; set: (k: string, v: any) => void;
+}) => (
+  <div>
+    <Label className="mb-2 block text-sm font-semibold">
+      {label}{hint && <span className="text-gray-400 font-normal text-xs ml-1.5">{hint}</span>}
+    </Label>
+    <div className="grid grid-cols-2 gap-3">
+      {LANGS.map(lang => (
+        <LangInput key={lang} lang={lang} value={g(`title_${lang}`)} onChange={v => set(`title_${lang}`, v)} />
+      ))}
+    </div>
+  </div>
+);
 
 const TourFormModal = ({ tour, onClose, onSaved }: TourFormModalProps) => {
   const isEdit = !!tour;
   const { toast } = useToast();
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [uploading, setUploading] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [collapsedDays, setCollapsedDays] = useState<Record<string, boolean>>({});
+  const toggleDay = (key: string) => setCollapsedDays(prev => ({ ...prev, [key]: !prev[key] }));
 
   const parseItinerary = (raw: any) => {
     if (!raw) return [{ day: 1, title: '', description: '' }];
@@ -54,532 +138,366 @@ const TourFormModal = ({ tour, onClose, onSaved }: TourFormModalProps) => {
   };
 
   const [form, setForm] = useState({
-    title_en: tour?.title || tour?.title_en || '',
-    title_ru: tour?.title_ru || '',
-    title_es: tour?.title_es || '',
-    title_ar: tour?.title_ar || '',
-    description_en: tour?.description || tour?.description_en || '',
-    description_ru: tour?.description_ru || '',
-    description_es: tour?.description_es || '',
-    description_ar: tour?.description_ar || '',
-    price: tour?.price || 0,
-    currency: tour?.currency || 'USD',
-    duration: tour?.duration || '',
-    max_people: tour?.max_people || 20,
-    difficulty: tour?.difficulty || 'easy',
-    category: tour?.category || 'package',
-    is_active: tour?.is_active ?? true,
-    is_featured: tour?.is_featured ?? false,
-    cover_image: tour?.image_url || '',
-    gallery_images: tour?.gallery_images || [],
-    start_date: tour?.start_date || '',
-    end_date: tour?.end_date || '',
-    status: tour?.status || 'Open',
-    tags: tour?.tags || '',
-    destinations: tour?.destinations || [],
-    // EN
-    itinerary: parseItinerary(tour?.itinerary),
-    highlights: (tour?.highlights || []).join('\n'),
-    included: (tour?.included || []).join('\n'),
-    not_included: (tour?.not_included || []).join('\n'),
-    // RU
-    itinerary_ru: parseItinerary(tour?.itinerary_ru),
-    highlights_ru: (tour?.highlights_ru || []).join('\n'),
-    included_ru: (tour?.included_ru || []).join('\n'),
-    not_included_ru: (tour?.not_included_ru || []).join('\n'),
-    // ES
-    itinerary_es: parseItinerary(tour?.itinerary_es),
-    highlights_es: (tour?.highlights_es || []).join('\n'),
-    included_es: (tour?.included_es || []).join('\n'),
-    not_included_es: (tour?.not_included_es || []).join('\n'),
-    // AR
-    itinerary_ar: parseItinerary(tour?.itinerary_ar),
-    highlights_ar: (tour?.highlights_ar || []).join('\n'),
-    included_ar: (tour?.included_ar || []).join('\n'),
-    not_included_ar: (tour?.not_included_ar || []).join('\n'),
+    title_en: tour?.title || tour?.title_en || '', title_ru: tour?.title_ru || '', title_es: tour?.title_es || '', title_ar: tour?.title_ar || '',
+    description_en: tour?.description || tour?.description_en || '', description_ru: tour?.description_ru || '', description_es: tour?.description_es || '', description_ar: tour?.description_ar || '',
+    price: tour?.price || 0, currency: tour?.currency || 'USD', duration: tour?.duration || '',
+    max_people: tour?.max_people || 20, difficulty: tour?.difficulty || 'easy', category: tour?.category || 'package',
+    is_active: tour?.is_active ?? true, is_featured: tour?.is_featured ?? false, is_event: tour?.is_event ?? false,
+    cover_image: tour?.image_url || '', gallery_images: tour?.gallery_images || [],
+    start_date: tour?.start_date || '', end_date: tour?.end_date || '', status: tour?.status || 'Open',
+    tags: tour?.tags || '', destinations: tour?.destinations || [],
+    highlights_en: (tour?.highlights || []).join('\n'),     highlights_ru: (tour?.highlights_ru || []).join('\n'),
+    highlights_es: (tour?.highlights_es || []).join('\n'),  highlights_ar: (tour?.highlights_ar || []).join('\n'),
+    included_en: (tour?.included || []).join('\n'),         included_ru: (tour?.included_ru || []).join('\n'),
+    included_es: (tour?.included_es || []).join('\n'),      included_ar: (tour?.included_ar || []).join('\n'),
+    not_included_en: (tour?.not_included || []).join('\n'), not_included_ru: (tour?.not_included_ru || []).join('\n'),
+    not_included_es: (tour?.not_included_es || []).join('\n'), not_included_ar: (tour?.not_included_ar || []).join('\n'),
+    itinerary_en: parseItinerary(tour?.itinerary),         itinerary_ru: parseItinerary(tour?.itinerary_ru),
+    itinerary_es: parseItinerary(tour?.itinerary_es),      itinerary_ar: parseItinerary(tour?.itinerary_ar),
+    packing_tips_en: (tour?.packing_tips || []).join('\n'),     packing_tips_ru: (tour?.packing_tips_ru || []).join('\n'),
+    packing_tips_es: (tour?.packing_tips_es || []).join('\n'),  packing_tips_ar: (tour?.packing_tips_ar || []).join('\n'),
+    // Event fields
+    why_it_matters_en: tour?.why_it_matters    || '', why_it_matters_ru: tour?.why_it_matters_ru || '',
+    why_it_matters_es: tour?.why_it_matters_es || '', why_it_matters_ar: tour?.why_it_matters_ar || '',
+    who_is_it_for_en: (tour?.who_is_it_for || []).join('\n'),     who_is_it_for_ru: (tour?.who_is_it_for_ru || []).join('\n'),
+    who_is_it_for_es: (tour?.who_is_it_for_es || []).join('\n'),  who_is_it_for_ar: (tour?.who_is_it_for_ar || []).join('\n'),
+    optional_experiences_en: (tour?.optional_experiences || []).join('\n'),     optional_experiences_ru: (tour?.optional_experiences_ru || []).join('\n'),
+    optional_experiences_es: (tour?.optional_experiences_es || []).join('\n'),  optional_experiences_ar: (tour?.optional_experiences_ar || []).join('\n'),
   });
 
   const set = (field: string, value: any) => setForm(f => ({ ...f, [field]: value }));
+  const g = (field: string) => (form as any)[field];
+  const splitLines = (s: string) => s.split('\n').map((x: string) => x.trim()).filter(Boolean);
 
-  // EN itinerary helpers
-  const addDay = () => {
-    set('itinerary', [...form.itinerary, { day: form.itinerary.length + 1, title: '', description: '' }]);
-  };
-  const removeDay = (idx: number) => {
-    set('itinerary', form.itinerary.filter((_: any, i: number) => i !== idx).map((d: any, i: number) => ({ ...d, day: i + 1 })));
-  };
-  const updateDay = (idx: number, field: string, value: string) => {
-    set('itinerary', form.itinerary.map((d: any, i: number) => i === idx ? { ...d, [field]: value } : d));
-  };
-
-  // Other lang itinerary helper
-  const updateDayLang = (lang: string, idx: number, field: string, value: string) => {
-    set(lang, (form as any)[lang].map((d: any, i: number) => i === idx ? { ...d, [field]: value } : d));
+  // Itinerary — добавление/удаление синхронно во всех языках
+  const getIt = (lang: string) => g(`itinerary_${lang}`);
+  const addDay = () => LANGS.forEach(lang => {
+    const days = getIt(lang);
+    set(`itinerary_${lang}`, [...days, { day: days.length + 1, title: '', description: '' }]);
+  });
+  const removeDay = (idx: number) => LANGS.forEach(lang => {
+    set(`itinerary_${lang}`, getIt(lang).filter((_: any, i: number) => i !== idx).map((d: any, i: number) => ({ ...d, day: i + 1 })));
+  });
+  const updateDay = (lang: string, idx: number, field: string, value: string) => {
+    set(`itinerary_${lang}`, getIt(lang).map((d: any, i: number) => i === idx ? { ...d, [field]: value } : d));
   };
 
-  // Destinations helpers
-  const [expandedDestCountries, setExpandedDestCountries] = useState<string[]>([]);
-  const toggleDestCountry = (country: string) => {
-    setExpandedDestCountries(prev =>
-      prev.includes(country) ? prev.filter(c => c !== country) : [...prev, country]
-    );
-  };
-  const toggleDest = (dest: string) => {
-    const current: string[] = form.destinations;
-    const updated = current.includes(dest) ? current.filter(d => d !== dest) : [...current, dest];
-    set('destinations', updated);
-  };
-  const toggleAllDestCountry = (country: string) => {
+  // Destinations
+  const [expandedDest, setExpandedDest] = useState<string[]>([]);
+  const toggleDest = (dest: string) => set('destinations', form.destinations.includes(dest) ? form.destinations.filter((d: string) => d !== dest) : [...form.destinations, dest]);
+  const toggleAllDest = (country: string) => {
     const subs = DESTINATION_GROUPS[country as keyof typeof DESTINATION_GROUPS];
-    const allSelected = subs.every(s => form.destinations.includes(s));
-    if (allSelected) {
-      set('destinations', form.destinations.filter((d: string) => !subs.includes(d)));
-    } else {
-      set('destinations', [...new Set([...form.destinations, ...subs])]);
-    }
+    const all = subs.every((s: string) => form.destinations.includes(s));
+    set('destinations', all ? form.destinations.filter((d: string) => !subs.includes(d)) : [...new Set([...form.destinations, ...subs])]);
   };
 
+  // Upload
   const uploadImage = async (file: File, isGallery = false) => {
     const setter = isGallery ? setUploadingGallery : setUploading;
     setter(true);
-    const ext = file.name.split('.').pop();
-    const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${file.name.split('.').pop()}`;
     const { error } = await supabase.storage.from('tour-images').upload(path, file);
-    if (error) {
-      toast({ title: 'Upload failed', description: error.message, variant: 'destructive' });
-      setter(false);
-      return null;
-    }
+    if (error) { toast({ title: 'Upload failed', description: error.message, variant: 'destructive' }); setter(false); return null; }
     const { data } = supabase.storage.from('tour-images').getPublicUrl(path);
-    setter(false);
-    return data.publicUrl;
+    setter(false); return data.publicUrl;
   };
-
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const url = await uploadImage(file);
-    if (url) set('cover_image', url);
+    const file = e.target.files?.[0]; if (!file) return;
+    const url = await uploadImage(file); if (url) set('cover_image', url);
   };
-
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    if (form.gallery_images.length + files.length > 10) {
-      toast({ title: 'Maximum 10 gallery images', variant: 'destructive' });
-      return;
-    }
-    for (const file of files) {
-      const url = await uploadImage(file, true);
-      if (url) setForm(f => ({ ...f, gallery_images: [...f.gallery_images, url] }));
-    }
+    if (form.gallery_images.length + files.length > 10) { toast({ title: 'Maximum 10 gallery images', variant: 'destructive' }); return; }
+    for (const file of files) { const url = await uploadImage(file, true); if (url) setForm(f => ({ ...f, gallery_images: [...f.gallery_images, url] })); }
   };
-
-  const removeGalleryImage = (idx: number) => {
-    setForm(f => ({ ...f, gallery_images: f.gallery_images.filter((_: string, i: number) => i !== idx) }));
-  };
-
-  const splitLines = (s: string) => s.split('\n').map((x: string) => x.trim()).filter(Boolean);
+  const removeGalleryImage = (idx: number) => setForm(f => ({ ...f, gallery_images: f.gallery_images.filter((_: string, i: number) => i !== idx) }));
 
   const handleSave = async () => {
-    if (!form.title_en.trim()) {
-      toast({ title: 'English title is required', variant: 'destructive' });
+    const newErrors: Record<string, boolean> = {};
+    if (!form.title_en.trim())       newErrors.title_en = true;
+    if (!form.description_en.trim()) newErrors.description_en = true;
+    if (!form.price || Number(form.price) <= 0) newErrors.price = true;
+    if (!form.duration.trim())       newErrors.duration = true;
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast({ title: 'Заполните обязательные поля', description: 'Поля выделены красным', variant: 'destructive' });
       return;
     }
+    setErrors({});
     setSaving(true);
-
     const slug = form.title_en.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-
+    const ev = form.is_event;
     const payload: Record<string, unknown> = {
-      title: form.title_en,
-      title_en: form.title_en,
-      title_ru: form.title_ru || '',
-      title_es: form.title_es || '',
-      title_ar: form.title_ar || '',
-      description: form.description_en || '',
-      description_en: form.description_en || '',
-      description_ru: form.description_ru || '',
-      description_es: form.description_es || '',
-      description_ar: form.description_ar || '',
-      price: Number(form.price),
-      currency: form.currency,
-      duration: form.duration || '',
-      max_people: Number(form.max_people),
-      difficulty: form.difficulty,
-      category: form.category,
-      is_active: form.is_active,
-      is_featured: form.is_featured,
-      image_url: form.cover_image || null,
-      gallery_images: form.gallery_images,
-      start_date: form.start_date || null,
-      end_date: form.end_date || null,
-      status: form.status,
-      slug: isEdit ? (tour.slug || slug) : slug,
-      tags: form.tags || '',
-      destinations: form.destinations || [],
-      // EN
-      itinerary: form.itinerary,
-      highlights: splitLines(form.highlights),
-      included: splitLines(form.included),
-      not_included: splitLines(form.not_included),
-      // RU
-      itinerary_ru: form.itinerary_ru,
-      highlights_ru: splitLines(form.highlights_ru),
-      included_ru: splitLines(form.included_ru),
-      not_included_ru: splitLines(form.not_included_ru),
-      // ES
-      itinerary_es: form.itinerary_es,
-      highlights_es: splitLines(form.highlights_es),
-      included_es: splitLines(form.included_es),
-      not_included_es: splitLines(form.not_included_es),
-      // AR
-      itinerary_ar: form.itinerary_ar,
-      highlights_ar: splitLines(form.highlights_ar),
-      included_ar: splitLines(form.included_ar),
-      not_included_ar: splitLines(form.not_included_ar),
+      title: form.title_en, title_en: form.title_en, title_ru: form.title_ru, title_es: form.title_es, title_ar: form.title_ar,
+      description: form.description_en, description_en: form.description_en, description_ru: form.description_ru, description_es: form.description_es, description_ar: form.description_ar,
+      price: Number(form.price), currency: form.currency, duration: form.duration, max_people: Number(form.max_people),
+      difficulty: form.difficulty, category: form.category, is_active: form.is_active, is_featured: form.is_featured, is_event: form.is_event,
+      image_url: form.cover_image || null, gallery_images: form.gallery_images,
+      start_date: form.start_date || null, end_date: form.end_date || null, status: form.status,
+      slug: isEdit ? (tour.slug || slug) : slug, tags: form.tags || '', destinations: form.destinations || [],
+      highlights: splitLines(form.highlights_en), highlights_ru: splitLines(form.highlights_ru), highlights_es: splitLines(form.highlights_es), highlights_ar: splitLines(form.highlights_ar),
+      included: splitLines(form.included_en), included_ru: splitLines(form.included_ru), included_es: splitLines(form.included_es), included_ar: splitLines(form.included_ar),
+      not_included: splitLines(form.not_included_en), not_included_ru: splitLines(form.not_included_ru), not_included_es: splitLines(form.not_included_es), not_included_ar: splitLines(form.not_included_ar),
+      itinerary: form.itinerary_en, itinerary_ru: form.itinerary_ru, itinerary_es: form.itinerary_es, itinerary_ar: form.itinerary_ar,
+      packing_tips: splitLines(form.packing_tips_en), packing_tips_ru: splitLines(form.packing_tips_ru), packing_tips_es: splitLines(form.packing_tips_es), packing_tips_ar: splitLines(form.packing_tips_ar),
+      why_it_matters: ev ? form.why_it_matters_en : '', why_it_matters_ru: ev ? form.why_it_matters_ru : '', why_it_matters_es: ev ? form.why_it_matters_es : '', why_it_matters_ar: ev ? form.why_it_matters_ar : '',
+      who_is_it_for: ev ? splitLines(form.who_is_it_for_en) : [], who_is_it_for_ru: ev ? splitLines(form.who_is_it_for_ru) : [], who_is_it_for_es: ev ? splitLines(form.who_is_it_for_es) : [], who_is_it_for_ar: ev ? splitLines(form.who_is_it_for_ar) : [],
+      optional_experiences: ev ? splitLines(form.optional_experiences_en) : [], optional_experiences_ru: ev ? splitLines(form.optional_experiences_ru) : [], optional_experiences_es: ev ? splitLines(form.optional_experiences_es) : [], optional_experiences_ar: ev ? splitLines(form.optional_experiences_ar) : [],
+      // program_highlights сохраняем пустыми (убрали секции)
+      program_highlights: [], program_highlights_ru: [], program_highlights_es: [], program_highlights_ar: [],
     };
-
     const { error } = isEdit
       ? await supabase.from('tours').update(payload as any).eq('id', tour.id)
       : await supabase.from('tours').insert(payload as any);
-
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    } else {
-      toast({ title: isEdit ? 'Tour updated!' : 'Tour created!' });
-      onSaved();
-    }
+    if (error) toast({ title: 'Ошибка', description: error.message, variant: 'destructive' });
+    else { toast({ title: isEdit ? 'Тур обновлён!' : 'Тур создан!' }); onSaved(); }
     setSaving(false);
   };
 
-  // ── Reusable itinerary block ──────────────────────────────────────────────
-  const ItineraryBlock = ({
-    lang,
-    days,
-    onAdd,
-    onRemove,
-    onUpdate,
-    dayLabel,
-    titlePlaceholder,
-    descPlaceholder,
-    heading,
-    dir,
-  }: {
-    lang: string;
-    days: any[];
-    onAdd?: () => void;
-    onRemove?: (i: number) => void;
-    onUpdate: (i: number, field: string, val: string) => void;
-    dayLabel: string;
-    titlePlaceholder: string;
-    descPlaceholder: string;
-    heading: string;
-    dir?: string;
-  }) => (
-    <div>
-      <div className="flex items-center justify-between mb-3">
-        <Label className="text-base font-semibold">{heading}</Label>
-        {onAdd && (
-          <Button type="button" size="sm" variant="outline" onClick={onAdd} className="gap-1">
-            <Plus className="w-4 h-4" /> Add Day
+  // ── Маршрут по дням ──────────────────────────────────────────────────────
+  const ItinerarySection = () => {
+    const enDays = getIt('en');
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <Label className="text-sm font-semibold">Маршрут по дням</Label>
+          <Button type="button" size="sm" variant="outline" onClick={addDay} className="gap-1 text-xs">
+            <Plus className="w-3 h-3" /> Добавить день
           </Button>
-        )}
+        </div>
+        <div className="space-y-2">
+          {enDays.map((_: any, idx: number) => {
+            const dayNum = idx + 1;
+            const key = `day_${idx}`;
+            const isCollapsed = collapsedDays[key] !== false;
+            return (
+              <div key={idx} className="border-2 border-gray-200 rounded-xl overflow-hidden">
+                <div className="flex items-center gap-3 px-4 py-2.5 bg-gray-50 cursor-pointer select-none" onClick={() => toggleDay(key)}>
+                  <div className="w-7 h-7 rounded-full bg-[#1E3A5F] text-white flex items-center justify-center text-xs font-bold shrink-0">{dayNum}</div>
+                  <span className="flex-1 text-sm font-semibold text-gray-700 truncate">
+                    {getIt('en')[idx]?.title || `День ${dayNum}`}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    {enDays.length > 1 && (
+                      <button type="button" onClick={e => { e.stopPropagation(); removeDay(idx); }} className="text-red-400 hover:text-red-600">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                    {isCollapsed ? <ChevronDown className="w-4 h-4 text-gray-400" /> : <ChevronUp className="w-4 h-4 text-gray-400" />}
+                  </div>
+                </div>
+
+                {!isCollapsed && (
+                  <div className="p-4 space-y-4 bg-white">
+                    {/* Дата — только EN */}
+                    <div>
+                      <label className="text-xs text-gray-500 font-medium block mb-1">Дата (необязательно, напр. August 30)</label>
+                      <input
+                        value={getIt('en')[idx]?.date || ''}
+                        onChange={e => updateDay('en', idx, 'date', e.target.value)}
+                        placeholder="August 30"
+                        className="w-full max-w-xs border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#1E3A5F]"
+                      />
+                    </div>
+                    {/* Название дня — 2×2 */}
+                    <div>
+                      <label className="text-xs text-gray-500 font-medium block mb-2">Название дня</label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {LANGS.map(lang => (
+                          <div key={lang} className={`relative border-2 rounded-xl ${LANG_BORDER[lang]} bg-white overflow-hidden`}>
+                            <span className={`absolute top-1/2 -translate-y-1/2 left-2.5 text-[11px] font-bold px-1.5 py-0.5 rounded border ${LANG_BADGE[lang]} z-10 pointer-events-none select-none`}>
+                              {LANG_LABEL[lang]}
+                            </span>
+                            <input
+                              value={getIt(lang)[idx]?.title || ''}
+                              onChange={e => updateDay(lang, idx, 'title', e.target.value)}
+                              dir={lang === 'ar' ? 'rtl' : undefined}
+                              className="w-full pl-16 pr-3 py-2.5 text-sm bg-transparent outline-none focus:outline-none border-none"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    {/* Описание дня — 2×2 */}
+                    <div>
+                      <label className="text-xs text-gray-500 font-medium block mb-2">Описание дня</label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {LANGS.map(lang => (
+                          <div key={lang} className={`relative border-2 rounded-xl ${LANG_BORDER[lang]} bg-white overflow-hidden`}>
+                            <span className={`absolute top-2 left-2.5 text-[11px] font-bold px-1.5 py-0.5 rounded border ${LANG_BADGE[lang]} z-10 pointer-events-none select-none`}>
+                              {LANG_LABEL[lang]}
+                            </span>
+                            <textarea
+                              value={getIt(lang)[idx]?.description || ''}
+                              onChange={e => updateDay(lang, idx, 'description', e.target.value)}
+                              dir={lang === 'ar' ? 'rtl' : undefined}
+                              rows={3}
+                              className="w-full pt-8 px-3 pb-2 text-sm bg-transparent resize-none outline-none focus:outline-none border-none"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
-      <div className="space-y-3">
-        {days.map((day: any, idx: number) => (
-          <div key={idx} className="border border-gray-200 rounded-lg p-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="font-semibold text-sm text-gray-700">{dayLabel} {day.day}</span>
-              {onRemove && days.length > 1 && (
-                <button onClick={() => onRemove(idx)} className="text-red-400 hover:text-red-600">
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-            <Input
-              placeholder={titlePlaceholder}
-              value={day.title}
-              onChange={e => onUpdate(idx, 'title', e.target.value)}
-              dir={dir}
-            />
-            <Textarea
-              placeholder={descPlaceholder}
-              value={day.description}
-              onChange={e => onUpdate(idx, 'description', e.target.value)}
-              rows={2}
-              dir={dir}
-            />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+    );
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 overflow-y-auto py-8">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl mx-4">
+    <div
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/50"
+      style={{ overflowY: 'scroll' }}  /* scroll на внешнем — не прыгает при фокусе */
+    >
+      <div className="bg-white w-full h-full flex flex-col" onClick={e => e.stopPropagation()}>
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-gray-900">{isEdit ? 'Edit Tour' : 'Add New Tour'}</h2>
-          <button onClick={onClose}><X className="w-5 h-5 text-gray-400 hover:text-gray-600" /></button>
+        {/* Шапка */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 sticky top-0 bg-white z-20 rounded-t-xl">
+          <h2 className="text-xl font-bold text-gray-900">{isEdit ? 'Редактировать тур' : 'Добавить новый тур'}</h2>
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-1">
+              {LANGS.map(lang => <span key={lang} className={`text-[11px] font-bold px-2 py-0.5 rounded border ${LANG_BADGE[lang]}`}>{LANG_LABEL[lang]}</span>)}
+            </div>
+            <button onClick={onClose}><X className="w-5 h-5 text-gray-400 hover:text-gray-600" /></button>
+          </div>
         </div>
 
-        <div className="px-6 py-5 space-y-6 max-h-[70vh] overflow-y-auto">
+        {/* Тело — обычный div без overflow, скролл на внешнем оверлее */}
+        <div ref={scrollRef} className="px-6 py-6 space-y-7 flex-1 overflow-y-auto">
 
-          {/* ── Языковые вкладки ── */}
-          <Tabs defaultValue="en">
-            <TabsList className="mb-3">
-              <TabsTrigger value="en">English</TabsTrigger>
-              <TabsTrigger value="ru">Russian</TabsTrigger>
-              <TabsTrigger value="es">Spanish</TabsTrigger>
-              <TabsTrigger value="ar">Arabic</TabsTrigger>
-            </TabsList>
+          {/* ── ТЕКСТОВЫЙ КОНТЕНТ ── */}
+          <section className="space-y-6">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">📝 Текстовый контент</p>
 
-            {/* ENGLISH */}
-            <TabsContent value="en" className="space-y-4">
-              <div>
-                <Label>Title (English) <span className="text-red-500">*</span></Label>
-                <Input value={form.title_en} onChange={e => set('title_en', e.target.value)} placeholder="Tour title in English" />
+            {/* Название — 2×2 input */}
+            <div>
+              <Label className="mb-2 block text-sm font-semibold">
+                Название тура <span className="text-gray-400 font-normal text-xs ml-1">(EN обязательно)</span>
+              </Label>
+              <div className="grid grid-cols-2 gap-3">
+                {LANGS.map(lang => (
+                  <div key={lang} className={`relative border-2 rounded-xl ${lang === 'en' && errors.title_en ? 'border-red-400' : LANG_BORDER[lang]} bg-white overflow-hidden`}>
+                    <span className={`absolute top-1/2 -translate-y-1/2 left-2.5 text-[11px] font-bold px-1.5 py-0.5 rounded border ${LANG_BADGE[lang]} z-10 pointer-events-none select-none`}>
+                      {LANG_LABEL[lang]}
+                    </span>
+                    <input
+                      value={g(`title_${lang}`)}
+                      onChange={e => { set(`title_${lang}`, e.target.value); if (lang === 'en') setErrors(p => ({ ...p, title_en: false })); }}
+                      dir={lang === 'ar' ? 'rtl' : undefined}
+                      className="w-full pl-16 pr-3 py-3 text-sm bg-transparent outline-none focus:outline-none border-none"
+                    />
+                  </div>
+                ))}
               </div>
-              <div>
-                <Label>Description (English)</Label>
-                <Textarea value={form.description_en} onChange={e => set('description_en', e.target.value)} placeholder="Description in English" rows={4} />
-              </div>
-              <div>
-                <Label>Highlights (each item on new line)</Label>
-                <Textarea value={form.highlights} onChange={e => set('highlights', e.target.value)} placeholder={"Ride through meadows\nStay in yurts\nSunrise over lake"} rows={4} />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>What's Included (each item on new line)</Label>
-                  <Textarea value={form.included} onChange={e => set('included', e.target.value)} placeholder={"Accommodation\nMeals\nGuide"} rows={5} />
-                </div>
-                <div>
-                  <Label>Not Included (each item on new line)</Label>
-                  <Textarea value={form.not_included} onChange={e => set('not_included', e.target.value)} placeholder={"Flights\nPersonal expenses\nTips"} rows={5} />
-                </div>
-              </div>
-              <ItineraryBlock
-                lang="itinerary"
-                days={form.itinerary}
-                onAdd={addDay}
-                onRemove={removeDay}
-                onUpdate={updateDay}
-                dayLabel="Day"
-                heading="Itinerary (Day by Day)"
-                titlePlaceholder="Day title (e.g. Arrival in Bishkek)"
-                descPlaceholder="Day description..."
-              />
-            </TabsContent>
+            </div>
 
-            {/* RUSSIAN */}
-            <TabsContent value="ru" className="space-y-4">
-              <div>
-                <Label>Название тура (Russian)</Label>
-                <Input value={form.title_ru} onChange={e => set('title_ru', e.target.value)} placeholder="Название тура на русском" />
-              </div>
-              <div>
-                <Label>Описание (Russian)</Label>
-                <Textarea value={form.description_ru} onChange={e => set('description_ru', e.target.value)} placeholder="Описание на русском" rows={4} />
-              </div>
-              <div>
-                <Label>Highlights — каждый пункт с новой строки</Label>
-                <Textarea value={form.highlights_ru} onChange={e => set('highlights_ru', e.target.value)} placeholder={"Верховая езда\nНочёвка в юрте\nРассвет над озером"} rows={4} />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>Включено — каждый пункт с новой строки</Label>
-                  <Textarea value={form.included_ru} onChange={e => set('included_ru', e.target.value)} placeholder={"Проживание\nПитание\nГид"} rows={5} />
-                </div>
-                <div>
-                  <Label>Не включено — каждый пункт с новой строки</Label>
-                  <Textarea value={form.not_included_ru} onChange={e => set('not_included_ru', e.target.value)} placeholder={"Авиабилеты\nЛичные расходы\nЧаевые"} rows={5} />
-                </div>
-              </div>
-              <ItineraryBlock
-                lang="itinerary_ru"
-                days={form.itinerary_ru}
-                onUpdate={(i, f, v) => updateDayLang('itinerary_ru', i, f, v)}
-                dayLabel="День"
-                heading="Маршрут по дням"
-                titlePlaceholder="Название дня (напр. Приезд в Бишкек)"
-                descPlaceholder="Описание дня..."
-              />
-            </TabsContent>
+            <QuadTextarea label="Описание" fieldBase="description" rows={5} g={g} set={set} />
+            <QuadTextarea label="Highlights" fieldBase="highlights" rows={4} hint="каждый пункт с новой строки" g={g} set={set} />
 
-            {/* SPANISH */}
-            <TabsContent value="es" className="space-y-4">
-              <div>
-                <Label>Título (Spanish)</Label>
-                <Input value={form.title_es} onChange={e => set('title_es', e.target.value)} placeholder="Título del tour en español" />
-              </div>
-              <div>
-                <Label>Descripción (Spanish)</Label>
-                <Textarea value={form.description_es} onChange={e => set('description_es', e.target.value)} placeholder="Descripción en español" rows={4} />
-              </div>
-              <div>
-                <Label>Highlights — cada punto en nueva línea</Label>
-                <Textarea value={form.highlights_es} onChange={e => set('highlights_es', e.target.value)} placeholder={"Paseo a caballo\nNoche en yurta\nAmanecer sobre el lago"} rows={4} />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>Incluido — cada punto en nueva línea</Label>
-                  <Textarea value={form.included_es} onChange={e => set('included_es', e.target.value)} placeholder={"Alojamiento\nComidas\nGuía"} rows={5} />
-                </div>
-                <div>
-                  <Label>No incluido — cada punto en nueva línea</Label>
-                  <Textarea value={form.not_included_es} onChange={e => set('not_included_es', e.target.value)} placeholder={"Vuelos\nGastos personales\nPropinas"} rows={5} />
-                </div>
-              </div>
-              <ItineraryBlock
-                lang="itinerary_es"
-                days={form.itinerary_es}
-                onUpdate={(i, f, v) => updateDayLang('itinerary_es', i, f, v)}
-                dayLabel="Día"
-                heading="Itinerario día a día"
-                titlePlaceholder="Título del día (ej. Llegada a Bishkek)"
-                descPlaceholder="Descripción del día..."
-              />
-            </TabsContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <QuadTextarea label="Включено" fieldBase="included" rows={4} hint="с новой строки" g={g} set={set} />
+              <QuadTextarea label="Не включено" fieldBase="not_included" rows={4} hint="с новой строки" g={g} set={set} />
+            </div>
 
-            {/* ARABIC */}
-            <TabsContent value="ar" className="space-y-4" dir="rtl">
-              <div>
-                <Label>العنوان (Arabic)</Label>
-                <Input value={form.title_ar} onChange={e => set('title_ar', e.target.value)} placeholder="عنوان الجولة بالعربية" dir="rtl" />
-              </div>
-              <div>
-                <Label>الوصف (Arabic)</Label>
-                <Textarea value={form.description_ar} onChange={e => set('description_ar', e.target.value)} placeholder="الوصف بالعربية" rows={4} dir="rtl" />
-              </div>
-              <div>
-                <Label>Highlights — كل نقطة في سطر جديد</Label>
-                <Textarea value={form.highlights_ar} onChange={e => set('highlights_ar', e.target.value)} placeholder={"ركوب الخيل\nالإقامة في الخيمة\nشروق الشمس على البحيرة"} rows={4} dir="rtl" />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>ما يشمله البرنامج — كل نقطة في سطر</Label>
-                  <Textarea value={form.included_ar} onChange={e => set('included_ar', e.target.value)} placeholder={"الإقامة\nالوجبات\nمرشد"} rows={5} dir="rtl" />
-                </div>
-                <div>
-                  <Label>ما لا يشمله البرنامج — كل نقطة في سطر</Label>
-                  <Textarea value={form.not_included_ar} onChange={e => set('not_included_ar', e.target.value)} placeholder={"تذاكر الطيران\nالمصاريف الشخصية\nالإكراميات"} rows={5} dir="rtl" />
-                </div>
-              </div>
-              <ItineraryBlock
-                lang="itinerary_ar"
-                days={form.itinerary_ar}
-                onUpdate={(i, f, v) => updateDayLang('itinerary_ar', i, f, v)}
-                dayLabel="اليوم"
-                heading="البرنامج اليومي"
-                titlePlaceholder="عنوان اليوم"
-                descPlaceholder="وصف اليوم..."
-                dir="rtl"
-              />
-            </TabsContent>
-          </Tabs>
+            <QuadTextarea label="Что взять с собой" fieldBase="packing_tips" rows={3} hint="с новой строки" g={g} set={set} />
 
-          {/* ── Основные поля ── */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div>
-              <Label>Price</Label>
-              <Input type="number" min={0} value={form.price} onChange={e => set('price', e.target.value)} />
+            {/* Маршрут по дням */}
+            <ItinerarySection />
+          </section>
+
+          {/* ── EVENT ПОЛЯ ── */}
+          {form.is_event && (
+            <section className="border-2 border-amber-200 bg-amber-50/20 rounded-2xl p-5 space-y-6">
+              <p className="text-xs font-bold text-amber-600 uppercase tracking-widest">🏆 Event поля</p>
+
+              {/* Порядок: Почему это важно → Для кого → Дополнительные */}
+              <QuadTextarea label="Почему это важно" fieldBase="why_it_matters" rows={4} g={g} set={set} />
+              <QuadTextarea label="Для кого этот тур?" fieldBase="who_is_it_for" rows={3} hint="с новой строки" g={g} set={set} />
+              <QuadTextarea label="Дополнительные впечатления" fieldBase="optional_experiences" rows={3} hint="с новой строки" g={g} set={set} />
+            </section>
+          )}
+
+          {/* ── ОСНОВНЫЕ НАСТРОЙКИ ── */}
+          <section className="border border-gray-200 rounded-xl p-5 space-y-5">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">⚙️ Основные настройки</p>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div>
+                <Label className="text-xs mb-1 block">Цена {errors.price && <span className="text-red-500 text-xs">*</span>}</Label>
+                <Input type="number" min={0} value={form.price} onChange={e => { set('price', e.target.value); setErrors(p => ({ ...p, price: false })); }} className={errors.price ? 'border-red-400' : ''} />
+              </div>
+              <div><Label className="text-xs mb-1 block">Валюта</Label>
+                <Select value={form.currency} onValueChange={v => set('currency', v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{CURRENCIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs mb-1 block">Продолжительность {errors.duration && <span className="text-red-500 text-xs">*</span>}</Label>
+                <Input value={form.duration} onChange={e => { set('duration', e.target.value); setErrors(p => ({ ...p, duration: false })); }} placeholder="5 Days" className={errors.duration ? 'border-red-400' : ''} />
+              </div>
+              <div><Label className="text-xs mb-1 block">Макс. людей</Label><Input type="number" min={1} value={form.max_people} onChange={e => set('max_people', e.target.value)} /></div>
+              <div><Label className="text-xs mb-1 block">Сложность</Label>
+                <Select value={form.difficulty} onValueChange={v => set('difficulty', v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{DIFFICULTIES.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div><Label className="text-xs mb-1 block">Категория</Label>
+                <Select value={form.category} onValueChange={v => set('category', v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div><Label className="text-xs mb-1 block">Дата начала</Label><Input type="date" value={form.start_date} onChange={e => set('start_date', e.target.value)} /></div>
+              <div><Label className="text-xs mb-1 block">Дата окончания</Label><Input type="date" value={form.end_date} onChange={e => set('end_date', e.target.value)} /></div>
             </div>
+
+            {/* Теги */}
             <div>
-              <Label>Currency</Label>
-              <Select value={form.currency} onValueChange={v => set('currency', v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {CURRENCIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Duration (e.g. "5 Days")</Label>
-              <Input value={form.duration} onChange={e => set('duration', e.target.value)} placeholder="5 Days" />
-            </div>
-            <div>
-              <Label>Max People</Label>
-              <Input type="number" min={1} value={form.max_people} onChange={e => set('max_people', e.target.value)} />
-            </div>
-            <div>
-              <Label>Difficulty</Label>
-              <Select value={form.difficulty} onValueChange={v => set('difficulty', v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {DIFFICULTIES.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Category</Label>
-              <Select value={form.category} onValueChange={v => set('category', v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="sm:col-span-2 lg:col-span-3">
-              <Label className="mb-2 block">Tags</Label>
+              <Label className="text-xs font-bold mb-2 block">Теги активностей</Label>
               <div className="flex flex-wrap gap-2">
                 {TAGS.map(tag => {
                   const selected = (form.tags || '').split(',').map((t: string) => t.trim()).includes(tag);
                   return (
-                    <button
-                      key={tag}
-                      type="button"
-                      onClick={() => {
-                        const current = (form.tags || '').split(',').map((t: string) => t.trim()).filter(Boolean);
-                        const updated = selected ? current.filter(t => t !== tag) : [...current, tag];
-                        set('tags', updated.join(', '));
-                      }}
-                      className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${
-                        selected
-                          ? 'bg-[#1E3A5F] text-white border-[#1E3A5F]'
-                          : 'bg-white text-gray-600 border-gray-300 hover:border-[#1E3A5F] hover:text-[#1E3A5F]'
-                      }`}
-                    >
+                    <button key={tag} type="button"
+                      onClick={() => { const cur = (form.tags || '').split(',').map((t: string) => t.trim()).filter(Boolean); set('tags', (selected ? cur.filter(t => t !== tag) : [...cur, tag]).join(', ')); }}
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all ${selected ? 'bg-[#1E3A5F] text-white border-[#1E3A5F]' : 'bg-white text-gray-600 border-gray-300 hover:border-[#1E3A5F]'}`}>
                       {TAG_LABELS[tag]}
                     </button>
                   );
                 })}
               </div>
             </div>
+
             {/* Destinations */}
-            <div className="sm:col-span-2 lg:col-span-3">
-              <Label className="mb-2 block">Destinations (места тура)</Label>
+            <div>
+              <Label className="text-xs font-bold mb-2 block">Направления</Label>
               <div className="space-y-2">
                 {(Object.keys(DESTINATION_GROUPS) as (keyof typeof DESTINATION_GROUPS)[]).map(country => {
                   const subs = DESTINATION_GROUPS[country];
-                  const allSelected = subs.every(s => form.destinations.includes(s));
-                  const someSelected = subs.some(s => form.destinations.includes(s));
-                  const isExpanded = expandedDestCountries.includes(country);
+                  const allSelected = subs.every((s: string) => form.destinations.includes(s));
+                  const someSelected = subs.some((s: string) => form.destinations.includes(s));
+                  const isExpanded = expandedDest.includes(country);
                   return (
                     <div key={country} className="border border-gray-200 rounded-xl overflow-hidden">
                       <div className="flex items-center gap-3 px-4 py-2 bg-gray-50">
-                        <input
-                          type="checkbox"
-                          checked={allSelected}
-                          ref={(el) => { if (el) el.indeterminate = someSelected && !allSelected; }}
-                          onChange={() => toggleAllDestCountry(country)}
-                          className="rounded accent-[#1E3A5F] w-4 h-4"
-                        />
-                        <span className="text-sm font-semibold text-gray-800 flex-1">{country}</span>
-                        <button type="button" onClick={() => toggleDestCountry(country)} className="text-gray-400 hover:text-gray-600">
+                        <input type="checkbox" checked={allSelected} ref={el => { if (el) el.indeterminate = someSelected && !allSelected; }} onChange={() => toggleAllDest(country)} className="rounded accent-[#1E3A5F] w-4 h-4" />
+                        <span className="text-sm font-semibold flex-1">{country}</span>
+                        <button type="button" onClick={() => setExpandedDest(prev => prev.includes(country) ? prev.filter(x => x !== country) : [...prev, country])} className="text-gray-400 hover:text-gray-600">
                           {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                         </button>
                       </div>
                       {isExpanded && (
                         <div className="px-4 py-2 grid grid-cols-2 md:grid-cols-3 gap-1">
-                          {subs.map(sub => (
+                          {subs.map((sub: string) => (
                             <label key={sub} className="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-gray-50 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={form.destinations.includes(sub)}
-                                onChange={() => toggleDest(sub)}
-                                className="rounded accent-[#1E3A5F] w-3.5 h-3.5 flex-shrink-0"
-                              />
+                              <input type="checkbox" checked={form.destinations.includes(sub)} onChange={() => toggleDest(sub)} className="rounded accent-[#1E3A5F] w-3.5 h-3.5" />
                               <span className="text-sm text-gray-700">{sub}</span>
                             </label>
                           ))}
@@ -593,85 +511,73 @@ const TourFormModal = ({ tour, onClose, onSaved }: TourFormModalProps) => {
                 <div className="flex flex-wrap gap-1.5 mt-2">
                   {form.destinations.map((d: string) => (
                     <span key={d} className="flex items-center gap-1 px-2.5 py-1 bg-[#1E3A5F]/10 text-[#1E3A5F] text-xs rounded-full">
-                      {d}
-                      <button type="button" onClick={() => toggleDest(d)}><X className="w-3 h-3" /></button>
+                      {d}<button type="button" onClick={() => toggleDest(d)}><X className="w-3 h-3" /></button>
                     </span>
                   ))}
                 </div>
               )}
             </div>
 
-            <div>
-              <Label>Start Date</Label>
-              <Input type="date" value={form.start_date} onChange={e => set('start_date', e.target.value)} />
+            {/* Toggles */}
+            <div className="flex flex-wrap gap-6 pt-1">
+              <div className="flex items-center gap-2"><Switch checked={form.is_active} onCheckedChange={v => set('is_active', v)} /><Label>Активный</Label></div>
+              <div className="flex items-center gap-2"><Switch checked={form.is_featured} onCheckedChange={v => set('is_featured', v)} /><Label>Featured</Label></div>
+              <div className="flex items-center gap-2">
+                <Switch checked={form.is_event} onCheckedChange={v => set('is_event', v)} />
+                <Label className="flex items-center gap-1.5">
+                  Событийный тур
+                  {form.is_event && <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-semibold rounded-full">EVENT</span>}
+                </Label>
+              </div>
             </div>
-            <div>
-              <Label>End Date</Label>
-              <Input type="date" value={form.end_date} onChange={e => set('end_date', e.target.value)} />
-            </div>
-          </div>
+          </section>
 
-          {/* ── Toggles ── */}
-          <div className="flex flex-wrap gap-6">
-            <div className="flex items-center gap-2">
-              <Switch checked={form.is_active} onCheckedChange={v => set('is_active', v)} />
-              <Label>Active</Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <Switch checked={form.is_featured} onCheckedChange={v => set('is_featured', v)} />
-              <Label>Featured</Label>
-            </div>
-          </div>
-
-          {/* ── Обложка ── */}
-          <div>
-            <Label>Cover Image</Label>
-            <div className="mt-1 flex items-center gap-4">
-              {form.cover_image ? (
+          {/* ── ОБЛОЖКА ── */}
+          <section className="border border-gray-200 rounded-xl p-4">
+            <Label className="font-semibold block mb-3">Обложка тура</Label>
+            <div className="flex items-center gap-4">
+              {form.cover_image && (
                 <div className="relative">
                   <img src={form.cover_image} alt="" className="w-24 h-24 rounded-lg object-cover" />
-                  <button onClick={() => set('cover_image', '')} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5">
-                    <X className="w-3 h-3" />
-                  </button>
+                  <button onClick={() => set('cover_image', '')} className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"><X className="w-3 h-3" /></button>
                 </div>
-              ) : null}
+              )}
               <label className="cursor-pointer flex items-center gap-2 px-4 py-2 border border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-green-500 hover:text-green-600 transition-colors">
-                <Upload className="w-4 h-4" />
-                {uploading ? 'Uploading...' : 'Upload cover'}
+                <Upload className="w-4 h-4" />{uploading ? 'Загрузка...' : 'Загрузить обложку'}
                 <input type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} disabled={uploading} />
               </label>
             </div>
-          </div>
+          </section>
 
-          {/* ── Галерея ── */}
-          <div>
-            <Label>Gallery Images (max 10)</Label>
-            <div className="mt-2 grid grid-cols-3 sm:grid-cols-5 gap-3">
+          {/* ── ГАЛЕРЕЯ ── */}
+          <section className="border border-gray-200 rounded-xl p-4">
+            <Label className="font-semibold block mb-3">Галерея (макс. 10 фото)</Label>
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
               {form.gallery_images.map((url: string, idx: number) => (
                 <div key={idx} className="relative group">
                   <img src={url} alt="" className="w-full aspect-square rounded-lg object-cover" />
-                  <button onClick={() => removeGalleryImage(idx)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Trash2 className="w-3 h-3" />
-                  </button>
+                  <button onClick={() => removeGalleryImage(idx)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-3 h-3" /></button>
                 </div>
               ))}
               {form.gallery_images.length < 10 && (
                 <label className="cursor-pointer flex flex-col items-center justify-center aspect-square border-2 border-dashed border-gray-300 rounded-lg text-gray-400 hover:border-green-500 hover:text-green-600 transition-colors">
                   <Upload className="w-5 h-5 mb-1" />
-                  <span className="text-xs">{uploadingGallery ? 'Uploading...' : 'Add'}</span>
+                  <span className="text-xs">{uploadingGallery ? 'Загрузка...' : 'Добавить'}</span>
                   <input type="file" accept="image/*" multiple className="hidden" onChange={handleGalleryUpload} disabled={uploadingGallery} />
                 </label>
               )}
             </div>
-          </div>
+          </section>
 
+          {/* Отступ снизу для кнопок */}
+          <div className="h-4" />
         </div>
 
-        {/* Footer */}
-        <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200">
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
+        {/* Кнопки — sticky снизу */}
+        <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 sticky bottom-0 bg-white rounded-b-xl z-20">
+          <Button variant="outline" onClick={onClose}>Отмена</Button>
           <Button onClick={handleSave} disabled={saving} className="bg-[#16a34a] hover:bg-[#15803d]">
-            {saving ? 'Saving...' : isEdit ? 'Save Changes' : 'Create Tour'}
+            {saving ? 'Сохранение...' : isEdit ? 'Сохранить' : 'Создать тур'}
           </Button>
         </div>
       </div>

@@ -23,6 +23,8 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminTours from "./pages/admin/AdminTours";
 import AdminBookings from "./pages/admin/AdminBookings";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminBanners from "@/pages/admin/AdminBanners";
+import AdminExpeditions from "@/pages/admin/AdminExpeditions";
 import WhatsAppWidget from "./components/WhatsAppWidget";
 
 const queryClient = new QueryClient();
@@ -37,11 +39,10 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           {/* Public routes with banner */}
-          <Route path="/" element={<><NomadGamesBanner /><Index /></>} />
+          <Route path="/" element={<><NomadGamesBanner /><Index /><WhatsAppWidget /></>} />
           <Route path="/guides" element={<><NomadGamesBanner /><GuidesPage /></>} />
           <Route path="/tours" element={<><NomadGamesBanner /><ToursPage /></>} />
           <Route path="/travel-tips" element={<><NomadGamesBanner /><TravelTipsPage /></>} />
-          <Route path="/tours/world-nomad-games-2026" element={<><NomadGamesBanner /><NomadGamesPage /></>} />
           <Route path="/tours/:slug" element={<><NomadGamesBanner /><TourDetailPage /></>} />
           <Route path="/search" element={<><NomadGamesBanner /><SearchResultsPage /></>} />
           <Route path="/about" element={<><NomadGamesBanner /><AboutKyrgyzstanPage /></>} />
@@ -58,12 +59,14 @@ const App = () => (
             <Route path="tours" element={<AdminTours />} />
             <Route path="bookings" element={<AdminBookings />} />
             <Route path="settings" element={<AdminSettings />} />
+            <Route path="banners" element={<AdminBanners />} />
+            <Route path="expeditions" element={<AdminExpeditions />} />
           </Route>
 
           {/* WhatsApp widget — только на публичных страницах */}
-<Route path="*" element={<WhatsAppWidget />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <WhatsAppWidget />
       </BrowserRouter>
     </TooltipProvider>
     </BannerProvider>

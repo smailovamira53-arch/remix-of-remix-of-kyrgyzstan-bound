@@ -4,17 +4,38 @@ import { Link } from 'react-router-dom';
 import { SectionHeader } from './SectionHeader';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 export const Activities = () => {
   const { t } = useLanguage();
 
+  const [tagCounts, setTagCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    supabase
+      .from('tours')
+      .select('tags')
+      .eq('is_active', true)
+      .then(({ data }) => {
+        const counts: Record<string, number> = {};
+        (data || []).forEach(tour => {
+          const tags = (tour.tags || '').toLowerCase();
+          ['trekking', 'horse-riding', 'ski-touring', 'yurt-camping', 'photography-tours', 'mountain-biking'].forEach(tag => {
+            if (tags.includes(tag)) counts[tag] = (counts[tag] || 0) + 1;
+          });
+        });
+        setTagCounts(counts);
+      });
+  }, []);
+
   const activities = [
-    { icon: Mountain, title: t.activities.trekking.title, description: t.activities.trekking.description, count: 24, type: 'trekking' },
-    { icon: Compass, title: t.activities.horseRiding.title, description: t.activities.horseRiding.description, count: 18, type: 'horse-riding' },
-    { icon: Snowflake, title: t.activities.paragliding.title, description: t.activities.paragliding.description, count: 10, type: 'ski-touring' },
-    { icon: Tent, title: t.activities.yurtCamping.title, description: t.activities.yurtCamping.description, count: 15, type: 'yurt-camping' },
-    { icon: Camera, title: t.activities.photography.title, description: t.activities.photography.description, count: 8, type: 'photography' },
-    { icon: Bike, title: t.activities.biking.title, description: t.activities.biking.description, count: 12, type: 'mountain-biking' },
+    { icon: Mountain, title: t.activities.trekking.title, description: t.activities.trekking.description, type: 'trekking' },
+    { icon: Compass, title: t.activities.horseRiding.title, description: t.activities.horseRiding.description, type: 'horse-riding' },
+    { icon: Snowflake, title: t.activities.paragliding.title, description: t.activities.paragliding.description, type: 'ski-touring' },
+    { icon: Tent, title: t.activities.yurtCamping.title, description: t.activities.yurtCamping.description, type: 'yurt-camping' },
+    { icon: Camera, title: t.activities.photography.title, description: t.activities.photography.description, type: 'photography-tours' },
+    { icon: Bike, title: t.activities.biking.title, description: t.activities.biking.description, type: 'mountain-biking' },
   ];
 
   return (
@@ -32,7 +53,9 @@ export const Activities = () => {
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="font-display text-lg font-semibold text-foreground group-hover:text-primary transition-colors">{activity.title}</h3>
-                      <span className="text-sm text-muted-foreground bg-muted px-2 py-0.5 rounded-full">{t.activities.toursCount.replace('{count}', String(activity.count))}</span>
+                      <span className="text-sm text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                        {t.activities.toursCount.replace('{count}', String(tagCounts[activity.type] || 0))}
+                      </span>
                     </div>
                     <p className="text-muted-foreground text-sm">{activity.description}</p>
                   </div>

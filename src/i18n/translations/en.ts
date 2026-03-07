@@ -218,7 +218,6 @@ export const en = {
 
   // Common
   common: {
-    backToHome: 'Back to Home',
     perPerson: '/person',
     days: 'days',
     day: 'day',
@@ -237,6 +236,7 @@ export const en = {
     perNight: '/night',
     details: 'Details',
     max: 'Max',
+    backToHome: 'Back to Home',
   },
 
   // Travel Tips Page
